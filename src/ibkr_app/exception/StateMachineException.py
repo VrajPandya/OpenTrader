@@ -1,0 +1,2 @@
+class UnexpectedStateTransition(Exception):
+    pass

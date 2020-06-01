@@ -1,0 +1,30 @@
+#+title: Crypto Trader                                                          
+#+author: Vraj Pandya                                                     
+#+date:File 2023-6-17                                                           
+#+STARTUP: overview
+Org file for CryptoTrader transition to cpp.
+
+
+* TODO get IBKR CPP working** T
+** DONE build ibapi cpp client with libbid as static api.
+   SCHEDULED: <2023-08-04 Fri>
+** TODO install and build ibapi cpp client with static library
+** TODO build ibapi cpp client with shared library
+*** TODO build 
+
+* TODO hookup with grpc
+
+* TODO get started with cmake* TODO get started with cmake
+
+* TODO hookup with grpc
+
+* TODO get docker to dockerize buid system
+** TODO find a good os docker to work with.
+
+* TODO get pulsar working
+
+* TODO port initial logic
+
+* TODO get docker to dockerize buid system
+** TODO find a good os docker to work with.
+

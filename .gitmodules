@@ -1,0 +1,6 @@
+[submodule "TraderGlobalConfig"]
+	path = TraderGlobalConfig
+	url = git@github.com:VrajPandya/TraderGlobalConfig.git
+[submodule "src/logic/TraderLogicConfigs"]
+	path = src/logic/TraderLogicConfigs
+	url = git@github.com:VrajPandya/TraderLogicConfigs.git

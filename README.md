@@ -1,0 +1,2 @@
+# CryptoTrader
+Simple Crypto Trader 

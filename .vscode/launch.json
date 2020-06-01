@@ -1,0 +1,135 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "historicalData",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/historical_data_ibkr.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Current Python File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "IBKRTrader",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/trader.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "geminiTrader",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/gemini_trader.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "telegramDemoApp",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/telegram_notifications/DemoApp.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONASYNCIODEBUG": "1"
+            },
+            "args": [
+                "-X",
+                "faulthandler"
+            ]
+        },
+        {
+            "name": "BackTester",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/back_test.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "telegramServer",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/telegram_notifications/TelegramNotificationsServer.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONASYNCIODEBUG": "1"
+            },
+            "args": [
+                "-X",
+                "faulthandler"
+            ]
+        },
+        {
+            "name": "telegramClient",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/telegram_notifications/TelegramNotifications.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "PYTHONASYNCIODEBUG": "1"
+            },
+            "args": [
+                "-X",
+                "faulthandler"
+            ]
+        },
+        {
+            "name": "mongo_tester",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/mongo_tester.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "btc_price_fetch",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/gemini/btc_price_fetch.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "gemini_order_events",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/gemini/gemini_order_events.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "gemini_order",
+            "type": "python",
+            "request": "launch",
+            "program": "${cwd}/src/gemini_order_tester.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Trader",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cpp/build/Trader",
+            "args": [],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": true
+          }
+    ]
+}

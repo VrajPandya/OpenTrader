@@ -1,0 +1,210 @@
+#+title: Crypto Trader
+#+author: Vraj Pandya
+#+date:File 2023-1-15
+#+STARTUP: overview
+Org file for CryptoTrader.
+
+* TODO State machine resetting
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+Every Trading Logic will have to implement custom methods to store its state.
+** TODO Test state machine resetting with ibkr to test the validity.
+** DONE Test state machine resetting with backtesting.
+** DONE find a way to serialize save the Trader logic state machine to disk.
+- Most likely, we simply save everything to state machine dict variable and write a method to serialize the dict to json and back.
+- We have decided to go with mongo to store the state of the trader logic.
+** DONE Impliment a method to restore the state machine from disk.
+** DONE write codec for state machine
+* TODO Make Code sharable
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO remove all the private keys/telegram chat id from source and source tree.
+** TODO remove all the things from the commit history
+
+* TODO Implement logic termination condition
+We don't expect a logic to go on forever.
+We need to be able to set some condition which logic itself can check and then decide to gracefully terminate itself.
+Conditions:
+1. Number of successful profit takes
+2. offset from the current price to operational range.
+
+* TODO Implement pubsub
+** TODO Setup pulsar pubsub example
+** TODO configure pulsar 
+1) It has to have timeouts
+2) One topic can have multiple consumers.
+3) One subscription can't block other subscriptions.
+4) Consumers can come online and go offline at any time.
+5) message should be dequeued when the all the existing subscribers have recived the message.
+
+* TODO Setup CLI Interface
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO Publisher Side Implementation
+** TODO Subscriber side Implementation
+
+* TODO Option chain
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO Implement a simple option chain fetcher
+** TODO Implement a simple option chain parser
+** TODO Implement a simple option chain analyzer
+
+* TODO Watchlist management
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO understand how the watch list management works? Is it a push or pull model?
+** TODO Implement a demo app that fetches tickers from watch list and monitors it.
+
+
+* TODO Ticker/Contract profit taker spread derivation
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO Implement the code to fetch the cost of putting order for a contract, i.e. trading fees.
+
+* TODO Order What Ifs
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO Implement basic logic to find the 
+
+* TODO Account information tracking
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO Positions tracking APIs to enable restoring the state of open positions when restarting the alg.
+** TODO Settled Cash
+** TODO Find a way to place an order without affecting logic state. Need a way to isolate order placement.
+** TODO NLV fetching API call setups.
+** TODO Implement Logic to find impact on NLV for an order.
+* TODO Trendlines And Graph analysis
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+This is a tricky one. Will have to Really think about this. Might have to start with trend analysis for ETFs and enable drawing custom lines.
+** TODO figure out a way to "draw" trendlines.
+** TODO modularize trendline drawing?
+We might use something like trendline to define what our maximas and minimas are?? Something that can easily help us
+
+* TODO More Validation by syncing existing orders/Account info etc.
+* TODO Pubsub Integration
+Would it be benificial to write a pubsub?
+Pro:
+1. Multi process logic.
+2. Easy management of logic because of multi processing.
+Con:
+1. Will have to work on it
+2. latency. Need to measure/read articles.
+* TODO Offline analysis
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** DONE Implement modular data collection script
+** TODO Implement streaming data collection to start making granular dataset.
+** TODO find 5 s Interval historical data of last 5 years at least.
+** TODO write up a simple data back up script for latest data. 
+** TODO hook up data backup with Onedrive/some cloud storage.
+
+* TODO Future Enhancements
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO Optimize Path to update onPrice Update.
+We are doing a lot of dictionary lookups. That must be Costing a TON. 
+** DONE OrderTracker
+*** DONE Make OrderTracker Thread safe.
+We use order tracking from IBKR. No need to implement something custom.
+*** DONE Implement interface to data storage engine so we can track things properly.
+
+** DONE Storage Engine
+** DONE Make the interface of the storage Engine Async so we can Write stuff Async and not block stuff. 
+No need for storage. As the order states are managed by IBKR and IBKR has great analysis tools.
+
+** DONE Coroutines FTW
+We had to ditch Coroutines. Coroutines somehow destabalize the IBKR API.
+Also there not easy to use concurrent queues.
+The Coroutines implement keyboard inturrupts and so does IBKR API.
+On a personal note, I don't like that as well Coroutines implementing keyboard inturrupts. 
+ We just need co routine powered event driven logic to power our Logic.
+ That is the only way to power higher order functions/logic.
+*** DONE Implement simple profit taker logic with co routines
+No need for co routines just yet.
+We used co routines for the telegram messaging and notification state management.
+*** DONE Think about all the limits that Co routine logic Engine can have. And how to implement it.
+No need for co routines just yet.
+**** DONE Hop Limit (Keep Hop counter)
+There is no logic hops with the updated architecture. if we need a complex logic, we implement complex state machine inside logic. Isolating logic and trade executions.
+**** DONE Time Limit (Keep start timestamp)
+No need. The state machine manipulations are very fast. We can only have bugs in state transitions nothing else.
+
+
+* DONE Gemini Integration
+** DONE Integrate Order placement REST APIs.
+Rant:It's really sad that Gemini doesn't have websocket API for placing orders.
+** DONE Integrate Order event subscription websockets
+** DONE Use higher frequency data stream for Gemini.
+** DONE integrate Gemini price fetching API
+Started with 1 minute bars. Don't need more granular info for now.
+Getting Realtime socket is just too much for a start.
+* DONE Data storage Interface
+We will have to use the MongoDB to store all our records for orders.
+** DONE Write a query interface
+** DONE Setup Mongo DB locally 
+** DONE Write a simple interface
+** DONE Setup a seperate event queue Just like telegram
+** DONE Define Entities
+Good thing is IBKR already provides these entities. We just need to store them.
+There are some entities that we will have to define ourselves. But 
+most of them are basically a composite of the existing entities.
+*** DONE Order
+*** DONE Composite Order
+*** DONE request session for requesting data feeds
+No need for that!! ^^
+
+
+* DONE Integrate State machine serialization 
+** DONE Write a backtest for Gemini
+Ha! what was I thinking? The backtests don't need any front end. 
+** DONE Integrate mongo interface w/ backtest
+
+* DONE Initial Implementation
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** DONE [#B] Place a simple for profit order which reads the current value and puts a simple profit taker for $10
+** DONE [#A] Implement a mechanism to register for callbacks when a specific contract gets updated.
+** DONE Set simple in memory way to track the active orders/requests/seqID
+** DONE Get BTC value from IBKR
+** DONE Setup code to get Next Request ID
+
+
+* DONE Initial Implementation of Telegram Messages
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** DONE Use the API 
+*** DONE for alerts.
+*** DONE for order state changes.
+** DONE [#A] Setup Telegram APIs 
+** DONE [#B] Implement a Co routine based event loop execution in seperate thread.
+This enabled us to enqueue the message to be sen
+** DONE Write Todo a script to get chat ID of the user. 
+
+
+* DONE Real time Data query/analytical engine 
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** DONE Numpy ring buffer are the way to GO!
+No NEED the trading frequency is not that high. We also have backend orders that can execute a 
+dynamic algo as well that can take some of low latency needs away from us.
+** DONE Implement a simple mechanism to have ring buffer like capabilities.
+*** DONE Implement a triple buffer swap chain for faster analysis
+No need. Simple architecture of Trader logic registering for tick updates only need to mange its state machine. The state machine management is very simple.
+Since all state machine management is mathemetical non blocking operations. We are not making big predictions. Only little adjustments.

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+// The telegram_comms service definition.
+service telegram_comms {
+  // Sends a greeting
+  rpc sendNotification (NotificationMessage) returns (ServerReply) {}
+}
+
+// The request message containing the user's name.
+message NotificationMessage {
+  string message_str = 1;
+}
+
+// The response message of whether the operation was successful or not
+message ServerReply {
+  bool success = 1;
+}
