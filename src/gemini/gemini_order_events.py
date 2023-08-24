@@ -42,4 +42,4 @@ ws = websocket.WebSocketApp("wss://api.gemini.com/v1/order/events",
                                 'X-GEMINI-APIKEY': gemini_api_key,
                                 'X-GEMINI-SIGNATURE': signature
                             })
-ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE}, ping_interval=30)

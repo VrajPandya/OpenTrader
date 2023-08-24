@@ -165,6 +165,8 @@ class MongoInterfaceManager(Thread):
             collection, document, opr = self.my_q.get()
             if opr == "insert_one":
                 collection.insert_one(document)
+            elif opr == "update_one":
+                collection.
             elif opr == "delete_one":
                 collection.delete_one(document)
             self.my_q.task_done()

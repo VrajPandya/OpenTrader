@@ -30,7 +30,7 @@ def gemini_trader_main():
     
     setup_managers_and_globals()
     constantStepOffsetTrader = ConstantStepOffsetTrader()
-    app = GeminiApp(trader_logic_list, is_paper=True)
+    app = GeminiApp(trader_logic_list, is_paper=False)
     trader_logic_list.append(constantStepOffsetTrader)
     setup_and_run_trading_app(app)
     app.join()

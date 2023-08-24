@@ -9,6 +9,7 @@ Org file for CryptoTrader.
 :VISIBILITY: children
 :END:
 Every Trading Logic will have to implement custom methods to store its state.
+** TODO Mongo needs an update call not insert.
 ** TODO Test state machine resetting with ibkr to test the validity.
 ** DONE Test state machine resetting with backtesting.
 ** DONE find a way to serialize save the Trader logic state machine to disk.
@@ -16,13 +17,15 @@ Every Trading Logic will have to implement custom methods to store its state.
 - We have decided to go with mongo to store the state of the trader logic.
 ** DONE Impliment a method to restore the state machine from disk.
 ** DONE write codec for state machine
-* TODO Make Code sharable
-:PROPERTIES:
-:VISIBILITY: folded
-:END:
-** TODO remove all the private keys/telegram chat id from source and source tree.
-** TODO remove all the things from the commit history
-
+* TODO Gemini Integration
+** TODO Integrate Order placement REST APIs.
+Rant:It's really sad that Gemini doesn't have websocket API for placing orders.
+** TODO Test state machine management with Gemini!!!!
+** DONE Integrate Order event subscription websockets
+** DONE Use higher frequency data stream for Gemini.
+** DONE integrate Gemini price fetching API
+Started with 1 minute bars. Don't need more granular info for now.
+Getting Realtime socket is just too much for a start.
 * TODO Implement logic termination condition
 We don't expect a logic to go on forever.
 We need to be able to set some condition which logic itself can check and then decide to gracefully terminate itself.
@@ -144,14 +147,13 @@ There is no logic hops with the updated architecture. if we need a complex logic
 No need. The state machine manipulations are very fast. We can only have bugs in state transitions nothing else.
 
 
-* DONE Gemini Integration
-** DONE Integrate Order placement REST APIs.
-Rant:It's really sad that Gemini doesn't have websocket API for placing orders.
-** DONE Integrate Order event subscription websockets
-** DONE Use higher frequency data stream for Gemini.
-** DONE integrate Gemini price fetching API
-Started with 1 minute bars. Don't need more granular info for now.
-Getting Realtime socket is just too much for a start.
+* DONE Make Code sharable
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+** TODO remove all the private keys/telegram chat id from source and source tree.
+** TODO remove all the things from the commit history
+
 * DONE Data storage Interface
 We will have to use the MongoDB to store all our records for orders.
 ** DONE Write a query interface

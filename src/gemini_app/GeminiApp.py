@@ -20,6 +20,7 @@ GEMINI_API_KEY_PATH = USER_HOME + "/.ssh/stars_in_sky.txt"
 
 GEMINI_API_SECRET_PATH = USER_HOME + "/.ssh/stars_aligned"
 
+PING_INTERVAL = 30
 
 class GeminiApp(Thread):
     def __init__(self, trader_logic_to_bind: list[TraderLogic], is_paper : bool) -> None:
@@ -65,7 +66,7 @@ class GeminiApp(Thread):
                 'X-GEMINI-APIKEY': self.gemini_api_key,
                 'X-GEMINI-SIGNATURE': signature
             })
-        ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+        ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE}, ping_interval=PING_INTERVAL)
 
     def on_order_error_event(self, ws, error):
         print("Order Event Error:")
@@ -127,7 +128,7 @@ class GeminiApp(Thread):
         print(message)
 
     def run(self):
-        self.webSocketsToRun[0].run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+        self.webSocketsToRun[0].run_forever(sslopt={"cert_reqs": ssl.CERT_NONE}, ping_interval=PING_INTERVAL)
 
     def bindAllLogic(self):
         for logic in self.traderLogicList:

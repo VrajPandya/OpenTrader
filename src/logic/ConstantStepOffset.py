@@ -342,6 +342,7 @@ class ConstantStepOffsetTrader(TraderLogic):
                     # Order already in flight
                     return
                 self.inFlightSellOrders[orderStep] = order_info
+        self.saveExecutedOrderState(order_info, orderStep)
         return
         
     def onRejected(self, order_info: OrderInformation):
@@ -382,11 +383,24 @@ class ConstantStepOffsetTrader(TraderLogic):
         executed_orders = self.state.executedOrders
 
         inProgressOrderStep = self.getOrderStep(order_info)
+
+        # We need to check if the order filled notification is duplicate or not.
+
+        
         if order_action == "BUY":
+
+            if self.inFlightBuyOrders[inProgressOrderStep] == None:
+                # TODO: use order ID to ensure we are not deleting the wrong order
+                # This is a duplicate notification
+                return
             executed_orders[inProgressOrderStep] = order_info
             self.saveExecutedOrderState(order_info, inProgressOrderStep)
             self.inFlightBuyOrders[inProgressOrderStep] = None
         else:
+            if self.inFlightSellOrders[inProgressOrderStep] == None:
+                # TODO: use order ID to ensure we are not deleting the wrong order
+                # This is a duplicate notification
+                return
             executed_orders[inProgressOrderStep] = None
             self.inFlightSellOrders[inProgressOrderStep] = None
             self.deleteExecutedOrder(order_info, inProgressOrderStep)
