@@ -1,4 +1,0 @@
-#!/usr/bin/bash
-
-# Start the telegram server
-python3 

@@ -50,5 +50,6 @@
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.linting.pylintEnabled": false
+    "python.linting.pylintEnabled": false,
+    "cmake.configureOnOpen": false
 }
