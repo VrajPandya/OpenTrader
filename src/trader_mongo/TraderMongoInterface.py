@@ -118,10 +118,15 @@ class OrderInformationCodec(TypeCodec):
         """Function that transforms a custom type value into a type
         that BSON can encode."""
         result = {}
-        
+        result["orderState"] = value.orderState
         result["orderInfo"] = self.order_codec.transform_python(value.orderInfo)
         result["contractInfo"] = self.contract_codec.transform_python(value.contractInfo)
         result["ErrorState"] = value.errorState.__dict__
+        result["currentFill"] = self.decimal_codec.transform_python(value.currentFill)
+        result["currentRemaining"] = self.decimal_codec.transform_python(value.currentRemaining)
+        result["currentAverageFillPrice"] = self.decimal_codec.transform_python(value.currentAverageFillPrice)
+        result["lastFillPrice"] = self.decimal_codec.transform_python(value.lastFillPrice)
+        result["marketCapPrice"] = self.decimal_codec.transform_python(value.marketCapPrice)
         return result
         
     def transform_bson(self, value):
@@ -145,6 +150,11 @@ class DecimalCodec(TypeCodec):
         """Function that transforms a vanilla BSON type value into our
         custom type."""
         return Decimal(value)
+    
+class MongoRequestParams:
+    def __init__(self, document, query = None):
+        self.document = document
+        self.query = query
 
 # Interface class for MongoDB
 class MongoInterfaceManager(Thread):
@@ -162,18 +172,27 @@ class MongoInterfaceManager(Thread):
 
     def run(self):
         while True:
-            collection, document, opr = self.my_q.get()
+            collection, request_params, opr = self.my_q.get()
             if opr == "insert_one":
-                collection.insert_one(document)
+                collection.insert_one(request_params.document)
             elif opr == "update_one":
-                collection.
+                collection.update_one(request_params.document, request_params.query)
             elif opr == "delete_one":
-                collection.delete_one(document)
+                collection.delete_one(request_params.document)
             self.my_q.task_done()
 
     def insert_one(self,collection, document):
-        self.my_q.put_nowait((collection, document, "insert_one"))
+        self.my_q.put_nowait((collection, 
+                              MongoRequestParams(document = document), 
+                              "insert_one"))
+
+    def update_one(self, collection, filter, document):
+        self.my_q.put_nowait((collection, 
+                              MongoRequestParams(document = document, query = filter), 
+                              "update_one"))
     
     def delete_one(self, collection, document):
-        self.my_q.put_nowait((collection, document, "delete_one"))
+        self.my_q.put_nowait((collection, 
+                              MongoRequestParams(document = document), 
+                              "delete_one"))
         

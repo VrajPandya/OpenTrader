@@ -53,7 +53,7 @@ def main():
     
     baseline = 32000
 
-    execution_step = 4
+    execution_step = 5
 
     doc_to_push = CustomTraderState(order_to_add, execution_step, baseline)
     mongoInterfaceManager = MongoInterfaceManager()
@@ -65,19 +65,31 @@ def main():
     # mongoInterfaceManager.insert_one(collection, {"executed_order": custom_trader_codec.transform_python(doc_to_push)})
 ###
 
+### update one
+    write_result = mongoInterfaceManager.update_one(collection, 
+        {"$set" : 
+         {"executed_order.baseline": 34000}},
+        {"$and" :
+        [{"executed_order.baseline": 32000}, 
+         {"executed_order.order_info.orderInfo.orderId" : 3},
+         {"executed_order.execution_step" : 4}]})
+    print(write_result)                  
+###
+
 
 ### delete all documents with baseline 31000
-    response = collection.delete_many({"$and" :
-            [{"executed_order.baseline": 31000}, 
-             {"executed_order.order_info.orderInfo.orderId" : 3}]} )
-    print(str(response.deleted_count) + " documents deleted.")
+    # response = collection.delete_many({"$and" :
+    #         [{"executed_order.baseline": 31000}, 
+    #          {"executed_order.order_info.orderInfo.orderId" : 3}]} )
+    # print(str(response.deleted_count) + " documents deleted.")
 ###
 
 ### find many
     # cursor = collection.find({"executed_order.order_info.orderInfo.orderId": 3})
     cursor = collection.find({"$and": 
-        [{"executed_order.baseline": 31000}, 
-         {"executed_order.order_info.orderInfo.orderId" : 3}]})
+        [{"executed_order.baseline": 32000}, 
+         {"executed_order.order_info.orderInfo.orderId" : 3},
+         {"executed_order.execution_step" : 4}]})
 
     for document in cursor:
         custom_trade_state = custom_trader_codec.transform_bson(document)
