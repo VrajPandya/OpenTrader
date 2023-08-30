@@ -152,9 +152,10 @@ class DecimalCodec(TypeCodec):
         return Decimal(value)
     
 class MongoRequestParams:
-    def __init__(self, document, query = None):
+    def __init__(self, document = None, query = None, update_statement = None):
         self.document = document
         self.query = query
+        self.update_statement = update_statement
 
 # Interface class for MongoDB
 class MongoInterfaceManager(Thread):
@@ -176,7 +177,7 @@ class MongoInterfaceManager(Thread):
             if opr == "insert_one":
                 collection.insert_one(request_params.document)
             elif opr == "update_one":
-                collection.update_one(request_params.document, request_params.query)
+                collection.update_one(request_params.update_statement, request_params.query)
             elif opr == "delete_one":
                 collection.delete_one(request_params.document)
             self.my_q.task_done()
@@ -186,9 +187,10 @@ class MongoInterfaceManager(Thread):
                               MongoRequestParams(document = document), 
                               "insert_one"))
 
-    def update_one(self, collection, filter, document):
+    def update_one(self, collection, filter, update_statement):
         self.my_q.put_nowait((collection, 
-                              MongoRequestParams(document = document, query = filter), 
+                              MongoRequestParams(update_statement= update_statement, 
+                                                 query = filter), 
                               "update_one"))
     
     def delete_one(self, collection, document):
