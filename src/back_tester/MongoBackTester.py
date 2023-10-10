@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from trader_mongo.TraderMongoInterface import MongoInterfaceManager
 import numpy as np
 
-CSV_DATA_PATH = "/Users/vrajpandya/repo/CryptoTrader/data/btc_historical_data_1_copy.csv"
+CSV_DATA_PATH = "/Users/vrajpandya/repo/OpenTrader/data/btc_historical_data_1_copy.csv"
 
 
 BTC_CONTRACT = createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", "PAXOS")

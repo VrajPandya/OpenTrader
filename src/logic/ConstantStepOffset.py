@@ -47,7 +47,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         doc_to_insert = self.stateCodec.transform_python(self.state)
         self.monoInterfaceManager.insert_one(self.mongoCollection, doc_to_insert)
 
-    def saveExecutedOrderState(self, order_info: OrderInformation, orderStep: int):
+    def upsertExecutedOrderState(self, order_info: OrderInformation, orderStep: int):
         doc_to_insert = self.executedOrderCodec.transform_python([order_info, orderStep, self.state.baseline])
         self.monoInterfaceManager.insert_one(self.mongoCollection, doc_to_insert)
 

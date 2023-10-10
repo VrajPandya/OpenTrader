@@ -7,7 +7,7 @@ def SetupLogger(enable_consol_logs = False):
     if not os.path.exists(pathToLogs):
         os.makedirs(pathToLogs)
 
-    time.strftime("cryptotrader.%Y%m%d_%H%M%S.log")
+    time.strftime("OpenTrader.%Y%m%d_%H%M%S.log")
 
     recfmt = '(%(threadName)s) %(asctime)s.%(msecs)03d %(levelname)s %(filename)s:%(lineno)d %(message)s'
 
@@ -15,7 +15,7 @@ def SetupLogger(enable_consol_logs = False):
 
     # logging.basicConfig( level=logging.DEBUG,
     #                    format=recfmt, datefmt=timefmt)
-    logging.basicConfig(filename=time.strftime("extras/log/cryptoTrader.%y%m%d_%H%M%S.log"),
+    logging.basicConfig(filename=time.strftime("extras/log/OpenTrader.%y%m%d_%H%M%S.log"),
                         filemode="w",
                         level=logging.INFO,
                         format=recfmt, datefmt=timefmt)

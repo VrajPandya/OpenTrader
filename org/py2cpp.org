@@ -2,7 +2,7 @@
 #+author: Vraj Pandya                                                     
 #+date:File 2023-6-17                                                           
 #+STARTUP: overview
-Org file for CryptoTrader transition to cpp.
+Org file for OpenTrader transition to cpp.
 
 
 * TODO get IBKR CPP working** T

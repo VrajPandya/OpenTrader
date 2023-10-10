@@ -5,14 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "historicalData",
-            "type": "python",
-            "request": "launch",
-            "program": "${cwd}/src/historical_data_ibkr.py",
-            "console": "integratedTerminal",
-            "justMyCode": true
-        },
-        {
             "name": "Current Python File",
             "type": "python",
             "request": "launch",
@@ -21,10 +13,18 @@
             "justMyCode": true
         },
         {
+            "name": "historicalData",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/historical_data_ibkr.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "IBKRTrader",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/trader.py",
+            "program": "${workspaceFolder}/src/trader.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -32,7 +32,7 @@
             "name": "geminiTrader",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/gemini_trader.py",
+            "program": "${workspaceFolder}/src/gemini_trader.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },
@@ -40,7 +40,7 @@
             "name": "telegramDemoApp",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/telegram_notifications/DemoApp.py",
+            "program": "${workspaceFolder}/src/telegram_notifications/DemoApp.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
@@ -55,7 +55,7 @@
             "name": "BackTester",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/back_test.py",
+            "program": "${workspaceFolder}/src/back_test.py",
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -63,7 +63,7 @@
             "name": "telegramServer",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/telegram_notifications/TelegramNotificationsServer.py",
+            "program": "${workspaceFolder}/src/telegram_notifications/TelegramNotificationsServer.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
@@ -78,7 +78,7 @@
             "name": "telegramClient",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/telegram_notifications/TelegramNotifications.py",
+            "program": "${workspaceFolder}/src/telegram_notifications/TelegramNotifications.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "env": {
@@ -93,7 +93,7 @@
             "name": "mongo_tester",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/mongo_tester.py",
+            "program": "${workspaceFolder}/src/mongo_tester.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },
@@ -101,7 +101,7 @@
             "name": "btc_price_fetch",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/gemini/btc_price_fetch.py",
+            "program": "${workspaceFolder}/src/gemini/btc_price_fetch.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },
@@ -109,7 +109,7 @@
             "name": "gemini_order_events",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/gemini/gemini_order_events.py",
+            "program": "${workspaceFolder}/src/gemini/gemini_order_events.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },
@@ -117,7 +117,7 @@
             "name": "gemini_order",
             "type": "python",
             "request": "launch",
-            "program": "${cwd}/src/gemini_order_tester.py",
+            "program": "${workspaceFolder}/src/gemini_order_tester.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },

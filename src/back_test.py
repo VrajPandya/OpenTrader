@@ -4,7 +4,7 @@ from telegram_notifications.TelegramNotifications import TelegramNotificationsMa
 from logic.ConstantStepOffset import ConstantStepOffsetTrader
 from trader_mongo.TraderMongoInterface import MongoInterfaceManager
 
-CSV_DATA_PATH = "/Users/vrajpandya/repo/CryptoTrader/data/btc_historical_data_1.csv"
+CSV_DATA_PATH = "/Users/vrajpandya/repo/OpenTrader/data/btc_historical_data_1.csv"
 
 def main():
     global GLOBAL_CONTEXT

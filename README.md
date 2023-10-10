@@ -1,2 +1,2 @@
-# CryptoTrader
+# OpenTrader
 Simple Crypto Trader 

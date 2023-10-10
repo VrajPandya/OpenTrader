@@ -1,8 +1,8 @@
-#+title: Crypto Trader
+#+title: Open Trader
 #+author: Vraj Pandya
 #+date:File 2023-1-15
 #+STARTUP: overview
-Org file for CryptoTrader.
+Org file for OpenTrader.
 
 * TODO State machine resetting
 :PROPERTIES:
