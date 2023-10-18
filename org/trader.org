@@ -9,9 +9,10 @@ Org file for OpenTrader.
 :VISIBILITY: children
 :END:
 Every Trading Logic will have to implement custom methods to store its state.
-** TODO Mongo needs an update call not insert.
+** TODO Mongo needs an update/upsert/replace call not insert.
+** TODO Test state machine resetting with backtesting.
 ** TODO Test state machine resetting with ibkr to test the validity.
-** DONE Test state machine resetting with backtesting.
+** TODO ensure the overall state saving works as expected.
 ** DONE find a way to serialize save the Trader logic state machine to disk.
 - Most likely, we simply save everything to state machine dict variable and write a method to serialize the dict to json and back.
 - We have decided to go with mongo to store the state of the trader logic.
@@ -34,6 +35,8 @@ Conditions:
 2. offset from the current price to operational range.
 
 * TODO Implement pubsub
+The Current two level dict lookups to find the correct logic to update the price on is a kind of a pubsub. The question is what is the level of surity we need.
+Do we need process isolation between logics? So far I think we do.
 ** TODO Setup pulsar pubsub example
 ** TODO configure pulsar 
 1) It has to have timeouts
@@ -41,6 +44,7 @@ Conditions:
 3) One subscription can't block other subscriptions.
 4) Consumers can come online and go offline at any time.
 5) message should be dequeued when the all the existing subscribers have recived the message.
+
 
 * TODO Setup CLI Interface
 :PROPERTIES:
@@ -63,6 +67,7 @@ Conditions:
 :END:
 ** TODO understand how the watch list management works? Is it a push or pull model?
 ** TODO Implement a demo app that fetches tickers from watch list and monitors it.
+
 
 
 * TODO Ticker/Contract profit taker spread derivation
@@ -146,6 +151,10 @@ There is no logic hops with the updated architecture. if we need a complex logic
 **** DONE Time Limit (Keep start timestamp)
 No need. The state machine manipulations are very fast. We can only have bugs in state transitions nothing else.
 
+
+
+* TODO Overall Refactor
+** TODO Rename OrderInfo to OrderDescriptor.
 
 * DONE Make Code sharable
 :PROPERTIES:

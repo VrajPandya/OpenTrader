@@ -9,6 +9,7 @@ from globalContext import GLOBAL_CONTEXT
 from state_tracking.OrderSubscription import OrderInformation
 from trader_mongo import TraderMongoInterface
 import logging
+from time import sleep
 
 from logic.ConstantStepOffsetStateCodec import ConstantStepOffsetStateCodec, ConstantStepOffsetExecutedOrderCodec
 from logic.ConstantStepOffsetTraderState import ConstantStepOffsetTraderState
@@ -16,50 +17,57 @@ from logic.ConstantStepOffsetTraderState import ConstantStepOffsetTraderState
 
 class ConstantStepOffsetTrader(TraderLogic):
     def loadState(self):
-        retrived_state_cursor = self.mongoCollection.find_one({"$and":
+        state_lookup_query = {"$and":
             [{"state_info.baseline" : self.state.baseline},
              {"state_info.stepDelta" : self.state.stepDelta},
              {"state_info.executionLimitOffset" : self.state.executionLimitOffset},
              {"state_info.stateTransitionThreshold" : self.state.stateTransitionThreshold},
-             {"state_info.orderQuantityInUSD" : self.state.orderQuantityInUSD}]})
-        if retrived_state_cursor is None:
-            return
-        # for document in retrived_state_cursor:
-        #     self.state = self.stateCodec.transform_bson(document)
-        #     break
-        # else continue using the default state
-        retrived_orders = self.mongoCollection.find({"executed_order.baseline" : self.state.baseline})
-        if retrived_orders is None:
+             {"state_info.orderQuantityInUSD" : self.state.orderQuantityInUSD}]}
+        retrived_state_cursor = self.mongoCollection.find_one(state_lookup_query)
+        if retrived_state_cursor == None:
+            # TODO insert the existing state and then return the id of the doc.
+            self.saveState()
+            sleep(2)
+            retrived_state_cursor = self.mongoCollection.find_one(state_lookup_query)
+        
+        self.mongo_logic_state_id = retrived_state_cursor["_id"]
+        retrived_orders = self.mongoCollection.find({"executed_order.logic_state_id" : self.mongo_logic_state_id})
+        if retrived_orders == None:
             return
         for document in retrived_orders:
             retrived_order = self.executedOrderCodec.transform_bson(document)
             self.state.executedOrders[retrived_order[1]] = retrived_order[0]
 
     def saveState(self):
-        retrived_state_cursor = self.mongoCollection.find_one({"$and":
+        state_lookup_query = {"$and":
             [{"state_info.baseline" : self.state.baseline},
              {"state_info.stepDelta" : self.state.stepDelta},
              {"state_info.executionLimitOffset" : self.state.executionLimitOffset},
              {"state_info.stateTransitionThreshold" : self.state.stateTransitionThreshold},
-             {"state_info.orderQuantityInUSD" : self.state.orderQuantityInUSD}]})
-        if retrived_state_cursor is not None:
-            return
+             {"state_info.orderQuantityInUSD" : self.state.orderQuantityInUSD}]}
         doc_to_insert = self.stateCodec.transform_python(self.state)
-        self.monoInterfaceManager.insert_one(self.mongoCollection, doc_to_insert)
+        self.monoInterfaceManager.find_one_and_replace(self.mongoCollection, state_lookup_query,  doc_to_insert, upsert=True)
 
-    def upsertExecutedOrderState(self, order_info: OrderInformation, orderStep: int):
-        doc_to_insert = self.executedOrderCodec.transform_python([order_info, orderStep, self.state.baseline])
-        self.monoInterfaceManager.insert_one(self.mongoCollection, doc_to_insert)
+    def upsertExecutedOrderState(self, 
+                                 order_info: OrderInformation, 
+                                 orderStep: int,
+                                 state_to_update : str = "executed_order"):
+        # used https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.update_one
+        query = { "$and" : [\
+            {"executed_order.logic_state_id" : self.mongo_logic_state_id},\
+            {"executed_order.execution_step": orderStep}\
+            ]}
+        doc_to_insert = self.executedOrderCodec.transform_python([order_info, orderStep, self.mongo_logic_state_id])
+        #TODO : optimize this to update only the required fields.
+        self.monoInterfaceManager.find_one_and_replace(self.mongoCollection, query,  doc_to_insert, upsert=True)
 
 
     def deleteExecutedOrder(self, order_info: OrderInformation, orderStep: int):
-        response = self.monoInterfaceManager.delete_one(self.mongoCollection, { "$and" : [\
-            {"executed_order.baseline" : self.state.baseline},\
+        self.monoInterfaceManager.delete_one(self.mongoCollection, { "$and" : [\
+            {"executed_order.logic_state_id" : self.mongo_logic_state_id},\
             {"executed_order.execution_step": orderStep}\
             ]})
-        if response == None:
-            return
-        logging.info("Deleted " + str(response.deleted_count) + " documents")
+        logging.info("Deleted step:" + str(orderStep) + " documents")
 
     def __init__(self):
         # PriceSubscriber 
@@ -94,7 +102,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         self.stateTransitionThreshold = self.state.stateTransitionThreshold
         self.executionLimitOffset = self.state.executionLimitOffset
         self.stepDelta = self.state.stepDelta
-        self.maxSteps = (self.executionLimitOffset // self.stepDelta) - 1 
+        self.maxSteps = int((self.executionLimitOffset // self.stepDelta) - 1)
         self.state.executedOrders = []
         for i in range(0, self.maxSteps + 1):
             self.state.executedOrders.append(None)
@@ -113,13 +121,13 @@ class ConstantStepOffsetTrader(TraderLogic):
 
         self.loadState()
 
-    def priceIsGoingDown(self):
+    def priceIsGoingDown(self) -> bool:
         return self.currentPrice < self.previousPrice
 
-    def priceIsGoingUp(self):
+    def priceIsGoingUp(self) -> bool:
         return self.currentPrice >= self.previousPrice
     
-    def getOrderStep(self, order: OrderInformation):
+    def getOrderStep(self, order: OrderInformation) -> int:
         baseline = self.state.baseline
         stepDelta = self.stepDelta
         if order.orderInfo.action == "BUY":
@@ -310,7 +318,8 @@ class ConstantStepOffsetTrader(TraderLogic):
         elif currentStateOfLogic == "SubmittingOrder":
             return
         elif currentStateOfLogic == "UpdateBaseline":
-            self.state.baseline = updated_price
+            SystemExit("Update Baseline not implemented")
+            self.state.baseline = float(updated_price)
             # We don't need to update the price states here
             # since the price states are updated in the next 
             # onPriceUpdate call
@@ -327,22 +336,22 @@ class ConstantStepOffsetTrader(TraderLogic):
         action = order_info.orderInfo.action
         self.state.logicState = "Observing"
         if action == "BUY":
-            if executedOrderForStep is None:
+            if executedOrderForStep == None:
                 # put Buy order in progress
                 inProgressBuyOrderForStep = self.inFlightBuyOrders[orderStep]
-                if inProgressBuyOrderForStep is not None:
+                if inProgressBuyOrderForStep != None:
                     # Order already in flight
                     return
                 self.inFlightBuyOrders[orderStep] = order_info
         else :
-            if executedOrderForStep is not None:
+            if executedOrderForStep != None:
                 # put sell order in progress
                 inProgressSellOrderForStep = self.inFlightSellOrders[orderStep]
-                if inProgressSellOrderForStep is not None:
+                if inProgressSellOrderForStep != None:
                     # Order already in flight
                     return
                 self.inFlightSellOrders[orderStep] = order_info
-        self.saveExecutedOrderState(order_info, orderStep)
+        self.upsertExecutedOrderState(order_info, orderStep)
         return
         
     def onRejected(self, order_info: OrderInformation):
@@ -394,7 +403,7 @@ class ConstantStepOffsetTrader(TraderLogic):
                 # This is a duplicate notification
                 return
             executed_orders[inProgressOrderStep] = order_info
-            self.saveExecutedOrderState(order_info, inProgressOrderStep)
+            self.upsertExecutedOrderState(order_info, inProgressOrderStep)
             self.inFlightBuyOrders[inProgressOrderStep] = None
         else:
             if self.inFlightSellOrders[inProgressOrderStep] == None:
@@ -413,5 +422,5 @@ class ConstantStepOffsetTrader(TraderLogic):
 
     def onOrderError(self, order_info: OrderInformation):
         super().onOrderError(order_info)
-        errorAndNotify("Something went Wrong:" + order_info.errorState.errorString + 
-                       "Error Code:" + order_info.errorState.errorCode)
+        errorAndNotify("Something went Wrong: " + order_info.errorState.errorString + 
+                       " Error Code: " + str(order_info.errorState.errorCode))

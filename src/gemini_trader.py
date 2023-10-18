@@ -22,8 +22,8 @@ def setup_and_run_trading_app(app : IBKRApp, isPaper=False, logToConsole=False):
 
 def setup_managers_and_globals():
     global GLOBAL_CONTEXT
-    GLOBAL_CONTEXT.telegramNotificationsManager = TelegramNotificationsManager()
-    GLOBAL_CONTEXT.mongoInterfaceManager = MongoInterfaceManager()
+    # GLOBAL_CONTEXT.telegramNotificationsManager = TelegramNotificationsManager()
+    # GLOBAL_CONTEXT.mongoInterfaceManager = MongoInterfaceManager()
 
 def gemini_trader_main():
     trader_logic_list = []

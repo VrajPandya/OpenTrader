@@ -85,12 +85,12 @@ class IBKRApp(EWrapper, EClient):
             print("Error: ", reqId, " ", errorCode, " ", errorString, " ")
             return
 
-        if logic_list is not None:
+        if logic_list != None:
             print (advancedOrderRejectJson)
             for logic in logic_list:
                 logic.onOrderError
             return
-        if order_subscriber is not None:
+        if order_subscriber != None:
             order_info = self.orderTracker.orderIDToOrderInformation[reqId]
             order_subscriber.onCanceled(order_info)
             return

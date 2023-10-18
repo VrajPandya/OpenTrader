@@ -59,9 +59,9 @@ def main():
     mongoInterfaceManager = MongoInterfaceManager()
     ## we passed the registry to the codec options 
     ## why no auto encode?
-    collection = mongoInterfaceManager.getCollection("trader_strat")
+    collection = mongoInterfaceManager.getCollection("test_collection")
     
-### insert one
+# insert one
     # mongoInterfaceManager.insert_one(collection, {"executed_order": custom_trader_codec.transform_python(doc_to_push)})
 ###
 
@@ -89,11 +89,17 @@ def main():
     cursor = collection.find({"$and": 
         [{"executed_order.baseline": 32000}, 
          {"executed_order.order_info.orderInfo.orderId" : 3},
-         {"executed_order.execution_step" : 4}]})
+         {"executed_order.execution_step" : 5}]})
+    
+    c1 = collection.find_one({"$and": 
+        [{"executed_order.baseline": 32000}, 
+         {"executed_order.order_info.orderInfo.orderId" : 3},
+         {"executed_order.execution_step" : 5}]})
 
+    print(c1['_id'])
     for document in cursor:
         custom_trade_state = custom_trader_codec.transform_bson(document)
-        print("" + str(custom_trade_state.baseline) + " " + str(custom_trade_state.execution_step))
+        print("" + str(custom_trade_state.baseline) + " " + str(custom_trade_state.execution_step) + " mongo doc id" + str(document['_id']))
 ###
 
     # result = collection.find_one({"orderID": 1})

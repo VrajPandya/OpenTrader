@@ -152,10 +152,11 @@ class DecimalCodec(TypeCodec):
         return Decimal(value)
     
 class MongoRequestParams:
-    def __init__(self, document = None, query = None, update_statement = None):
+    def __init__(self, document = None, query = None, update_statement = None, upsert = False):
         self.document = document
         self.query = query
         self.update_statement = update_statement
+        self.upsert = upsert
 
 # Interface class for MongoDB
 class MongoInterfaceManager(Thread):
@@ -177,9 +178,17 @@ class MongoInterfaceManager(Thread):
             if opr == "insert_one":
                 collection.insert_one(request_params.document)
             elif opr == "update_one":
-                collection.update_one(request_params.update_statement, request_params.query)
+                collection.update_one(request_params.update_statement, 
+                                      request_params.query, 
+                                      upsert=request_params.upsert)
             elif opr == "delete_one":
                 collection.delete_one(request_params.document)
+            elif opr == "find_one_and_replace":
+                result = collection.find_one_and_replace(request_params.query, 
+                                               request_params.document)
+                if result == None and request_params.upsert:
+                    res_1 = collection.insert_one(request_params.document)
+                    print(res_1)
             self.my_q.task_done()
 
     def insert_one(self,collection, document):
@@ -187,11 +196,19 @@ class MongoInterfaceManager(Thread):
                               MongoRequestParams(document = document), 
                               "insert_one"))
 
-    def update_one(self, collection, filter, update_statement):
+    def update_one(self, collection, filter, update_statement, upsert=False):
         self.my_q.put_nowait((collection, 
                               MongoRequestParams(update_statement= update_statement, 
-                                                 query = filter), 
+                                                 query = filter, 
+                                                 upsert = upsert), 
                               "update_one"))
+        
+    def find_one_and_replace(self, collection, filter, replacement, upsert=False):
+        self.my_q.put_nowait((collection, 
+                              MongoRequestParams(document = replacement, 
+                                                 query = filter,
+                                                 upsert = upsert), 
+                              "find_one_and_replace"))
     
     def delete_one(self, collection, document):
         self.my_q.put_nowait((collection, 

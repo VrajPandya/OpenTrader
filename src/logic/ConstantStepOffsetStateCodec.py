@@ -32,7 +32,7 @@ class ConstantStepOffsetStateCodec(TypeCodec):
         return result
     
 class ConstantStepOffsetExecutedOrderCodec(TypeCodec):
-    python_type = list[list[OrderInformation], int, Decimal]
+    python_type = list[list[OrderInformation], int, str]
     bson_type = dict
 
     def __init__(self):
@@ -43,7 +43,7 @@ class ConstantStepOffsetExecutedOrderCodec(TypeCodec):
         executed_order = {}
         executed_order["order_info"] = self.order_information_codec.transform_python(value[0])
         executed_order["execution_step"] = value[1]
-        executed_order["baseline"] = value[2]
+        executed_order["logic_state_id"] = value[2]
         result = {"executed_order": executed_order}
         return result
     
@@ -51,5 +51,5 @@ class ConstantStepOffsetExecutedOrderCodec(TypeCodec):
         trade_state_info = value["executed_order"]
         result = [self.order_information_codec.transform_bson(trade_state_info["order_info"]),
                     trade_state_info["execution_step"],
-                    trade_state_info["baseline"]]
+                    trade_state_info["logic_state_id"]]
         return result
