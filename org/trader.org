@@ -9,10 +9,10 @@ Org file for OpenTrader.
 :VISIBILITY: children
 :END:
 Every Trading Logic will have to implement custom methods to store its state.
-** TODO Mongo needs an update/upsert/replace call not insert.
-** TODO Test state machine resetting with backtesting.
 ** TODO Test state machine resetting with ibkr to test the validity.
 ** TODO ensure the overall state saving works as expected.
+** DONE Mongo needs an update/upsert/replace call not insert.
+** DONE Test state machine resetting with backtesting.
 ** DONE find a way to serialize save the Trader logic state machine to disk.
 - Most likely, we simply save everything to state machine dict variable and write a method to serialize the dict to json and back.
 - We have decided to go with mongo to store the state of the trader logic.
@@ -154,6 +154,9 @@ No need. The state machine manipulations are very fast. We can only have bugs in
 
 
 * TODO Overall Refactor
+:PROPERTIES:
+:VISIBILITY: children
+:END:
 ** TODO Rename OrderInfo to OrderDescriptor.
 
 * DONE Make Code sharable
