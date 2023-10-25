@@ -4,6 +4,14 @@
 #+STARTUP: overview
 Org file for OpenTrader.
 
+* TODO Overall Refactor
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+** TODO Rename OrderInfo to OrderDescriptor.
+=======
+Need the rename soon!
+
 * TODO State machine resetting
 :PROPERTIES:
 :VISIBILITY: children
@@ -113,12 +121,15 @@ Con:
 :PROPERTIES:
 :VISIBILITY: folded
 :END:
-** DONE Implement modular data collection script
+** TODO Offline BOT analysis
+*** TODO Need to implement csv generators for logic.
+*** TODO Need to generate Logic/Trading context, which helped inform decission to buy or sell. 
+*** TODO Provide list of context to reffer to for the trade.
 ** TODO Implement streaming data collection to start making granular dataset.
 ** TODO find 5 s Interval historical data of last 5 years at least.
 ** TODO write up a simple data back up script for latest data. 
 ** TODO hook up data backup with Onedrive/some cloud storage.
-
+** DONE Implement modular data collection script
 * TODO Future Enhancements
 :PROPERTIES:
 :VISIBILITY: folded
@@ -136,9 +147,10 @@ No need for storage. As the order states are managed by IBKR and IBKR has great 
 
 ** DONE Coroutines FTW
 We had to ditch Coroutines. Coroutines somehow destabalize the IBKR API.
-Also there not easy to use concurrent queues.
+Also there not easy to use concurrent queues. The python implementations are also buggy. 
 The Coroutines implement keyboard inturrupts and so does IBKR API.
-On a personal note, I don't like that as well Coroutines implementing keyboard inturrupts. 
+On a personal note, I don't like that as well Coroutines implementing keyboard inturrupts.
+Can't they invent some other signal handler? 
  We just need co routine powered event driven logic to power our Logic.
  That is the only way to power higher order functions/logic.
 *** DONE Implement simple profit taker logic with co routines
@@ -152,12 +164,6 @@ There is no logic hops with the updated architecture. if we need a complex logic
 No need. The state machine manipulations are very fast. We can only have bugs in state transitions nothing else.
 
 
-
-* TODO Overall Refactor
-:PROPERTIES:
-:VISIBILITY: children
-:END:
-** TODO Rename OrderInfo to OrderDescriptor.
 
 * DONE Make Code sharable
 :PROPERTIES:
