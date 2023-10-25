@@ -319,11 +319,12 @@ class ConstantStepOffsetTrader(TraderLogic):
             return
         elif currentStateOfLogic == "UpdateBaseline":
             SystemExit("Update Baseline not implemented")
-            self.state.baseline = float(updated_price)
+            
             # We don't need to update the price states here
             # since the price states are updated in the next 
             # onPriceUpdate call
-            infoAndNotify("Baseline Updated to " + str(updated_price))
+            # self.state.baseline = float(updated_price)
+            # infoAndNotify("Baseline Updated to " + str(updated_price))
         else:
             errorAndNotify("Reached Undefined state in OnPriceUpdate in ConstantOffset Update Logic")
             raise UnexpectedStateTransition()
@@ -351,6 +352,9 @@ class ConstantStepOffsetTrader(TraderLogic):
                     # Order already in flight
                     return
                 self.inFlightSellOrders[orderStep] = order_info
+        if self.state.logicState == "SubmittingOrder":
+            self.state.logicState = "Observing"
+         
         self.upsertExecutedOrderState(order_info, orderStep)
         return
         
@@ -385,6 +389,8 @@ class ConstantStepOffsetTrader(TraderLogic):
     ## FYI: On Accepted is called when the IBKR server accepts the order.
     ##      This does NOT mean that the order has been filled.
     def onAccepted(self, order_info: OrderInformation):
+        if self.state.logicState == "SubmittingOrder":
+            self.state.logicState = "Observing"
         return
 
     def onFilled(self, order_info: OrderInformation):
@@ -414,6 +420,8 @@ class ConstantStepOffsetTrader(TraderLogic):
             self.inFlightSellOrders[inProgressOrderStep] = None
             self.deleteExecutedOrder(order_info, inProgressOrderStep)
 
+        if self.state.logicState == "SubmittingOrder":
+            self.state.logicState = "Observing"
         action_str = "BOUGHT" if order_action == "BUY" else "SOLD"
         infoAndNotify(action_str + "! Quatity: " + str(order_info.orderInfo.totalQuantity) +
                         " avgFillPrice: " + str(order_info.currentAverageFillPrice) +
