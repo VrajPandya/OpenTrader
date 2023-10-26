@@ -4,6 +4,9 @@
 #+STARTUP: overview
 Org file for OpenTrader.
 
+* TODO HIPRI Bugs
+** TODO State transition doesn't work as expected when the price goes below the baseline then up.
+
 * TODO Overall Refactor
 :PROPERTIES:
 :VISIBILITY: children

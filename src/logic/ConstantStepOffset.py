@@ -239,9 +239,9 @@ class ConstantStepOffsetTrader(TraderLogic):
         # TODO: Implement state transition to "UpdateBaseline" state
 
     def transitionToOvserveState(self):
-        if self.state.logicState == "Observing":
-            errorAndNotify("Transition to \'Observing\' State to \'Observing\' state")
-        else:
+        # if self.state.logicState == "Observing":
+            # errorAndNotify("Transition to \'Observing\' State to \'Observing\' state")
+        # else:
             self.state.logicState = "Observing"
 
     def readyToBuy(self):
@@ -389,6 +389,11 @@ class ConstantStepOffsetTrader(TraderLogic):
     ## FYI: On Accepted is called when the IBKR server accepts the order.
     ##      This does NOT mean that the order has been filled.
     def onAccepted(self, order_info: OrderInformation):
+        if self.state.logicState == "SubmittingOrder":
+            self.state.logicState = "Observing"
+        return
+    
+    def onOrderOpened(self, order_info: OrderInformation):
         if self.state.logicState == "SubmittingOrder":
             self.state.logicState = "Observing"
         return

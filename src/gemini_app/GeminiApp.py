@@ -85,10 +85,10 @@ class GeminiApp(Thread):
                 type = message_dict["type"]
                 internal_status_type = ""
                 print(message)
-                if type == "heartbeat" or type == "subscription_ack" or type == "closed" or type == "initial":
-                    # TODO: implement existing orders on startup for "initial" type
+                ## convert Gemini lingo to internal
+                if type == "heartbeat" or type == "subscription_ack":
                     return
-                elif type == "accepted":
+                elif type == "initial":
                     internal_status_type = "ORDER_OPENED"
                 elif type == "accepted" or type == "booked":
                     internal_status_type = "Submitted"

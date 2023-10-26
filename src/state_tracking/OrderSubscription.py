@@ -57,7 +57,6 @@ class OrderSubscription:
         pass
 
     def onRejected(self, order_info : OrderInformation):
-        #order_info.orderState = "REJECTED"
         pass
 
     def onCanceled(self, order_info : OrderInformation):
@@ -70,7 +69,6 @@ class OrderSubscription:
         pass
 
     def onPartiallyFilled(self, order_info: OrderInformation):
-        #order_info.orderState = "PARTIALLY_FILLED"
         pass
 
     def onInactive(self, order_info: OrderInformation):
