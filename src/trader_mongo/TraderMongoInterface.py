@@ -6,7 +6,7 @@ from queue import Queue
 from ibapi.order import Order
 from ibapi.contract import Contract
 from ibapi.softdollartier import SoftDollarTier
-from state_tracking.OrderSubscription import OrderInformation
+from state_tracking.OrderSubscription import OrderDescriptor
 
 # from bson.decimal128 import Decimal128
 from bson.codec_options import TypeCodec
@@ -103,8 +103,8 @@ class IBContractCodec(TypeCodec):
         IBDefaultBsonDecoder(value, result)
         return result
 
-class OrderInformationCodec(TypeCodec):
-    python_type = OrderInformation    # the Python type acted upon by this type codec
+class OrderDescriptorCodec(TypeCodec):
+    python_type = OrderDescriptor    # the Python type acted upon by this type codec
     bson_type = dict   # the BSON type acted upon by this type codec
 
     def __init__(self):
@@ -134,7 +134,7 @@ class OrderInformationCodec(TypeCodec):
         custom type."""
         contract_info = self.contract_codec.transform_bson(value["contractInfo"])
         order_info = self.order_codec.transform_bson(value["orderInfo"])
-        result = OrderInformation(contract_info=contract_info, order=order_info)
+        result = OrderDescriptor(contract_info=contract_info, order=order_info)
         error_state = value["ErrorState"]
         result.errorState = error_state
         return result

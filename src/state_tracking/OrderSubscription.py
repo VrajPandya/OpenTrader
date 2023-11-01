@@ -5,7 +5,7 @@ from ibapi.order_state import OrderState
 from decimal import Decimal
 import logging
 
-class OrderInformation:
+class OrderDescriptor:
     # All the state pertaining to the order!
     #
     # This contains both the states/values provided by IBKR API classes and
@@ -45,36 +45,36 @@ class OrderSubscription:
     # def setOrderInterface(self, order_interface : IBKRApp):
     #     self.ibkrApp = order_interface
 
-    # def submitOrder(self, orderInfo : OrderInformation):
+    # def submitOrder(self, orderInfo : OrderDescriptor):
     #     order_id = self.ibkrApp.placeOrder(orderInfo)
     #     logging.info(f"Submitted Order for orderID: " + order_id)
     #     return order_id
 
-    def onSubmitted(self, order_info : OrderInformation):
+    def onSubmitted(self, order_info : OrderDescriptor):
         pass
 
-    def onOrderOpened(self, order_info : OrderInformation):
+    def onOrderOpened(self, order_info : OrderDescriptor):
         pass
 
-    def onRejected(self, order_info : OrderInformation):
+    def onRejected(self, order_info : OrderDescriptor):
         pass
 
-    def onCanceled(self, order_info : OrderInformation):
+    def onCanceled(self, order_info : OrderDescriptor):
         pass
 
-    def onAccepted(self, order_info : OrderInformation):
+    def onAccepted(self, order_info : OrderDescriptor):
         pass
 
-    def onFilled(self, order_info : OrderInformation):
+    def onFilled(self, order_info : OrderDescriptor):
         pass
 
-    def onPartiallyFilled(self, order_info: OrderInformation):
+    def onPartiallyFilled(self, order_info: OrderDescriptor):
         pass
 
-    def onInactive(self, order_info: OrderInformation):
+    def onInactive(self, order_info: OrderDescriptor):
         pass
 
-    def onOrderError(self, order_info: OrderInformation):
+    def onOrderError(self, order_info: OrderDescriptor):
         # TODO: handle cases where we have received the order staus
         # but not the error and all the permutations of the event chain
         # TODO: figure out the event chains.

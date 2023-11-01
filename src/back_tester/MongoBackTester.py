@@ -1,7 +1,7 @@
 import csv
 from decimal import Decimal
 from logic.TraderLogic import TraderLogic
-from state_tracking.OrderSubscription import OrderInformation
+from state_tracking.OrderSubscription import OrderDescriptor
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibkr_app.utils.contract_helper import createContractDescriptor
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ class BackTester:
         errorAndNotify("Halting the trader logic" + self.logicName)
         exit()
 
-    def placeOrderAndSubscribe(self, orderInfo : OrderInformation, orderSubscription):
+    def placeOrderAndSubscribe(self, orderInfo : OrderDescriptor, orderSubscription):
         self.openOrders.append(orderInfo)
         self.inFlightOrders.append(orderInfo)
         return orderSubscription

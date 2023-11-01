@@ -5,7 +5,7 @@ from ibapi import ticktype as IBTickType
 from ibapi.order import Order
 
 from state_tracking import Tracker
-from state_tracking.OrderSubscription import OrderSubscription, OrderInformation
+from state_tracking.OrderSubscription import OrderSubscription, OrderDescriptor
 from ibkr_app.exception.StateMachineException import UnexpectedStateTransition
 from ibkr_app.utils.TracingUtils import errorAndNotify, infoAndNotify
 
@@ -211,7 +211,7 @@ class GeminiApp(Thread):
     def openOrder(self, orderID: int, contract: Contract, order: Order, orderState: OrderState):
         super().openOrder(orderID, contract, order, orderState)
         order_subscriber = self.orderTracker.orderIDToSubscriber[orderID]
-        order_info = self.orderTracker.orderIDToOrderInformation[orderID]
+        order_info = self.orderTracker.orderIDToOrderDescriptor[orderID]
         order_info.orderInfo = order
         order_info.contractInfo = contract
         order_info.IBKROrderState = orderState
@@ -240,7 +240,7 @@ class GeminiApp(Thread):
                     avgFillPrice: float, permId: int, parentId: int, lastFillPrice: float, 
                     clientId: str, whyHeld: str, mktCapPrice: float):
         subscriber = self.orderTracker.orderIDToSubscriber[orderID]
-        order_info = self.orderTracker.orderIDToOrderInformation[orderID]
+        order_info = self.orderTracker.orderIDToOrderDescriptor[orderID]
         order_info.currentFill = filled
         order_info.currentRemaining = remaining
         order_info.currentAverageFillPrice = avgFillPrice
@@ -350,11 +350,11 @@ class GeminiApp(Thread):
         new_order = response.json()
 
 
-    def placeOrderAndSubscribe(self, order_information : OrderInformation, order_subscription : OrderSubscription) -> int:
+    def placeOrderAndSubscribe(self, order_descriptor : OrderDescriptor, order_subscription : OrderSubscription) -> int:
         order_id = self.nextOrderId()
-        self.orderTracker.trackOrder(order_id, order_information, order_subscription)
-        self.placeGeminiOrder(order_id, order_information.contractInfo, order_information.orderInfo)
-        order_information.orderID = order_id
+        self.orderTracker.trackOrder(order_id, order_descriptor, order_subscription)
+        self.placeGeminiOrder(order_id, order_descriptor.contractInfo, order_descriptor.orderInfo)
+        order_descriptor.orderID = order_id
         return order_id
         
     def keyboardInterrupt(self, keyboard_int):

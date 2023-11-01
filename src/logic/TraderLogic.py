@@ -2,7 +2,7 @@ from state_tracking.OrderSubscription import OrderSubscription
 from state_tracking.PriceSubscription import PriceSubscription
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibapi.contract import Contract
-from state_tracking.OrderSubscription import OrderInformation 
+from state_tracking.OrderSubscription import OrderDescriptor 
 from telegram_notifications.TelegramNotifications import TelegramNotificationsManager
 from pathlib import Path
 import json
@@ -56,16 +56,16 @@ class TraderLogic(OrderSubscription, PriceSubscription):
     def onPriceUpdate(self, updated_price: float, contract_for_update: Contract):
         pass
 
-    def onRejected(self, orderInfo : OrderInformation):
+    def onRejected(self, orderInfo : OrderDescriptor):
         pass
 
-    def onCanceled(self, orderInfo : OrderInformation):
+    def onCanceled(self, orderInfo : OrderDescriptor):
         pass
 
-    def onAccepted(self, orderInfo : OrderInformation):
+    def onAccepted(self, orderInfo : OrderDescriptor):
         pass
 
-    def onFilled(self, orderInfo : OrderInformation):
+    def onFilled(self, orderInfo : OrderDescriptor):
         pass
 
     def saveState(self):

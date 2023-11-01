@@ -8,7 +8,7 @@ from ibapi import ticktype as IBTickType
 from ibapi.order import Order
 
 from state_tracking import Tracker
-from state_tracking.OrderSubscription import OrderSubscription, OrderInformation
+from state_tracking.OrderSubscription import OrderSubscription, OrderDescriptor
 from ibkr_app.exception.StateMachineException import UnexpectedStateTransition
 from ibkr_app.utils.TracingUtils import errorAndNotify, infoAndNotify
 
@@ -91,7 +91,7 @@ class IBKRApp(EWrapper, EClient):
                 logic.onOrderError
             return
         if order_subscriber != None:
-            order_info = self.orderTracker.orderIDToOrderInformation[reqId]
+            order_info = self.orderTracker.orderIDToOrderDescriptor[reqId]
             order_subscriber.onCanceled(order_info)
             return
         
@@ -119,7 +119,7 @@ class IBKRApp(EWrapper, EClient):
     def openOrder(self, orderID: int, contract: Contract, order: Order, orderState: OrderState):
         super().openOrder(orderID, contract, order, orderState)
         order_subscriber = self.orderTracker.orderIDToSubscriber[orderID]
-        order_info = self.orderTracker.orderIDToOrderInformation[orderID]
+        order_info = self.orderTracker.orderIDToOrderDescriptor[orderID]
         order_info.orderInfo = order
         order_info.contractInfo = contract
         order_info.IBKROrderState = orderState
@@ -150,7 +150,7 @@ class IBKRApp(EWrapper, EClient):
                     clientId: int, whyHeld: str, mktCapPrice: float):
         super().orderStatus(orderID, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice)
         subscriber = self.orderTracker.orderIDToSubscriber[orderID]
-        order_info = self.orderTracker.orderIDToOrderInformation[orderID]
+        order_info = self.orderTracker.orderIDToOrderDescriptor[orderID]
         order_info.currentFill = filled
         order_info.currentRemaining = remaining
         order_info.currentAverageFillPrice = avgFillPrice
@@ -223,11 +223,11 @@ class IBKRApp(EWrapper, EClient):
         self.nextValidOrderId += 1
         return oid
 
-    def placeOrderAndSubscribe(self, order_information : OrderInformation, order_subscription : OrderSubscription) -> int:
+    def placeOrderAndSubscribe(self, order_descriptor : OrderDescriptor, order_subscription : OrderSubscription) -> int:
         order_id = self.nextOrderId()
-        self.orderTracker.trackOrder(order_id, order_information, order_subscription)
-        self.placeOrder(order_id, order_information.contractInfo, order_information.orderInfo)
-        order_information.orderID = order_id
+        self.orderTracker.trackOrder(order_id, order_descriptor, order_subscription)
+        self.placeOrder(order_id, order_descriptor.contractInfo, order_descriptor.orderInfo)
+        order_descriptor.orderID = order_id
         return order_id
         
     def keyboardInterrupt(self, keyboard_int):

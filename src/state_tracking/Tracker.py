@@ -1,4 +1,4 @@
-from state_tracking.OrderSubscription import OrderSubscription, OrderInformation
+from state_tracking.OrderSubscription import OrderSubscription, OrderDescriptor
 from ibapi.contract import Contract
 from logic import TraderLogic
 import logging
@@ -11,15 +11,15 @@ import logging
 
 class OrderTracker:
     orderIDToSubscriber : dict[int, OrderSubscription]
-    orderIDToOrderInformation : dict[int, OrderInformation]
+    orderIDToOrderDescriptor : dict[int, OrderDescriptor]
 
     def __init__(self):
         self.orderIDToSubscriber = dict()
-        self.orderIDToOrderInformation = dict()
+        self.orderIDToOrderDescriptor = dict()
 
-    def trackOrder(self, orderID: int, order_info :OrderInformation, subscriber :OrderSubscription):
+    def trackOrder(self, orderID: int, order_info :OrderDescriptor, subscriber :OrderSubscription):
         self.orderIDToSubscriber[orderID] = subscriber
-        self.orderIDToOrderInformation[orderID] = order_info
+        self.orderIDToOrderDescriptor[orderID] = order_info
 
     def stopTrackingOrder(self, orderID: int):
         removed_order = self.orderIDToSubscriber.pop(orderID, None)

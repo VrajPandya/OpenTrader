@@ -2,9 +2,9 @@ from decimal import Decimal
 from typing import Any 
 from bson.codec_options import TypeCodec
 from logic.ConstantStepOffsetTraderState import ConstantStepOffsetTraderState
-from trader_mongo.TraderMongoInterface import MongoInterfaceManager, OrderInformationCodec
-from state_tracking.OrderSubscription import OrderInformation
-from trader_mongo.TraderMongoInterface import IBOrderCodec, IBContractCodec, OrderInformationCodec, DecimalCodec
+from trader_mongo.TraderMongoInterface import MongoInterfaceManager, OrderDescriptorCodec
+from state_tracking.OrderSubscription import OrderDescriptor
+from trader_mongo.TraderMongoInterface import IBOrderCodec, IBContractCodec, OrderDescriptorCodec, DecimalCodec
 
 class ConstantStepOffsetStateCodec(TypeCodec):
     python_type = ConstantStepOffsetTraderState
@@ -32,16 +32,16 @@ class ConstantStepOffsetStateCodec(TypeCodec):
         return result
     
 class ConstantStepOffsetExecutedOrderCodec(TypeCodec):
-    python_type = list[list[OrderInformation], int, str]
+    python_type = list[list[OrderDescriptor], int, str]
     bson_type = dict
 
     def __init__(self):
         super().__init__()
-        self.order_information_codec = OrderInformationCodec()
+        self.order_descriptor_codec = OrderDescriptorCodec()
 
     def transform_python(self, value):
         executed_order = {}
-        executed_order["order_info"] = self.order_information_codec.transform_python(value[0])
+        executed_order["order_info"] = self.order_descriptor_codec.transform_python(value[0])
         executed_order["execution_step"] = value[1]
         executed_order["logic_state_id"] = value[2]
         result = {"executed_order": executed_order}
@@ -49,7 +49,7 @@ class ConstantStepOffsetExecutedOrderCodec(TypeCodec):
     
     def transform_bson(self, value):
         trade_state_info = value["executed_order"]
-        result = [self.order_information_codec.transform_bson(trade_state_info["order_info"]),
+        result = [self.order_descriptor_codec.transform_bson(trade_state_info["order_info"]),
                     trade_state_info["execution_step"],
                     trade_state_info["logic_state_id"]]
         return result

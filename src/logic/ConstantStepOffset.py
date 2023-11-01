@@ -6,7 +6,7 @@ from ibkr_app.utils.order_helper import *
 from decimal import Decimal
 from ibkr_app.utils.TracingUtils import errorAndNotify, infoAndNotify
 from globalContext import GLOBAL_CONTEXT
-from state_tracking.OrderSubscription import OrderInformation
+from state_tracking.OrderSubscription import OrderDescriptor
 from trader_mongo import TraderMongoInterface
 import logging
 from time import sleep
@@ -49,7 +49,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         self.monoInterfaceManager.find_one_and_replace(self.mongoCollection, state_lookup_query,  doc_to_insert, upsert=True)
 
     def upsertExecutedOrderState(self, 
-                                 order_info: OrderInformation, 
+                                 order_info: OrderDescriptor, 
                                  orderStep: int,
                                  state_to_update : str = "executed_order"):
         # used https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.update_one
@@ -62,7 +62,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         self.monoInterfaceManager.find_one_and_replace(self.mongoCollection, query,  doc_to_insert, upsert=True)
 
 
-    def deleteExecutedOrder(self, order_info: OrderInformation, orderStep: int):
+    def deleteExecutedOrder(self, order_info: OrderDescriptor, orderStep: int):
         self.monoInterfaceManager.delete_one(self.mongoCollection, { "$and" : [\
             {"executed_order.logic_state_id" : self.mongo_logic_state_id},\
             {"executed_order.execution_step": orderStep}\
@@ -127,7 +127,7 @@ class ConstantStepOffsetTrader(TraderLogic):
     def priceIsGoingUp(self) -> bool:
         return self.currentPrice >= self.previousPrice
     
-    def getOrderStep(self, order: OrderInformation) -> int:
+    def getOrderStep(self, order: OrderDescriptor) -> int:
         baseline = self.state.baseline
         stepDelta = self.stepDelta
         if order.orderInfo.action == "BUY":
@@ -146,10 +146,10 @@ class ConstantStepOffsetTrader(TraderLogic):
             return
         buy_quantity = Decimal(buy_quantity).quantize(Decimal("0.00000001"))
         order_desc = create_limit_order("BUY", "Minutes", buy_quantity, float(targetPrice))
-        order_information = OrderInformation(self.btc_contract, order_desc)
+        order_descriptor = OrderDescriptor(self.btc_contract, order_desc)
         self.state.logicState = "SubmittingOrder"
-        self.inFlightBuyOrders[cur_step] = order_information
-        self.submitOrder(order_information)
+        self.inFlightBuyOrders[cur_step] = order_descriptor
+        self.submitOrder(order_descriptor)
         
     def placeSellOrder(self, target_price: Decimal, sell_quantity: Decimal, cur_step: int):
         executedOrdersList = self.state.executedOrders
@@ -162,10 +162,10 @@ class ConstantStepOffsetTrader(TraderLogic):
             logging.info(info_str)
             return
         order_desc = create_limit_order("SELL", "Minutes", sell_quantity, float(target_price))
-        order_information = OrderInformation(self.btc_contract, order_desc)
+        order_descriptor = OrderDescriptor(self.btc_contract, order_desc)
         self.state.logicState = "SubmittingOrder"
-        self.inFlightSellOrders[cur_step] = order_information
-        self.submitOrder(order_information)
+        self.inFlightSellOrders[cur_step] = order_descriptor
+        self.submitOrder(order_descriptor)
         
     def reachedBuyZoneForStep(self) -> bool:
         baseline = self.state.baseline
@@ -276,16 +276,16 @@ class ConstantStepOffsetTrader(TraderLogic):
         # since we are in "readyToSell" state we assume that the state transition from 
         # observation state has ensured that we actually have an executed buy order.
         # except in case we missed the oppertunity to buy
-        placed_order_information = executedOrders[self.currentStep]
+        placed_order_descriptor = executedOrders[self.currentStep]
 
-        if placed_order_information == None:
+        if placed_order_descriptor == None:
             # we missed the oppertunity to buy
             # transition to observation state
             self.transitionToOvserveState()
             return
         
         if (target_price - self.currentPrice) < self.stateTransitionThreshold:
-            self.placeSellOrder(target_price, placed_order_information.orderInfo.totalQuantity, self.currentStep)
+            self.placeSellOrder(target_price, placed_order_descriptor.orderInfo.totalQuantity, self.currentStep)
 
 
     def onPriceUpdate(self, updated_price : Decimal, contract_descriptor: Contract):
@@ -330,7 +330,7 @@ class ConstantStepOffsetTrader(TraderLogic):
             raise UnexpectedStateTransition()
         return
         
-    def onSubmitted(self, order_info: OrderInformation):
+    def onSubmitted(self, order_info: OrderDescriptor):
         executedOrders = self.state.executedOrders
         orderStep = self.getOrderStep(order_info)
         executedOrderForStep = executedOrders[orderStep]
@@ -358,7 +358,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         self.upsertExecutedOrderState(order_info, orderStep)
         return
         
-    def onRejected(self, order_info: OrderInformation):
+    def onRejected(self, order_info: OrderDescriptor):
         inProgressOrderStep = self.getOrderStep(order_info)
         orderAction = order_info.orderInfo.action
         if orderAction == "BUY":
@@ -372,7 +372,7 @@ class ConstantStepOffsetTrader(TraderLogic):
                        +"order! For Price: " + str(order_info.orderInfo.lmtPrice))
         
         
-    def onCanceled(self, order_info: OrderInformation):
+    def onCanceled(self, order_info: OrderDescriptor):
         inProgressOrderStep = self.getOrderStep(order_info)
         orderAction = order_info.orderInfo.action
         if orderAction == "BUY":
@@ -388,17 +388,17 @@ class ConstantStepOffsetTrader(TraderLogic):
     
     ## FYI: On Accepted is called when the IBKR server accepts the order.
     ##      This does NOT mean that the order has been filled.
-    def onAccepted(self, order_info: OrderInformation):
+    def onAccepted(self, order_info: OrderDescriptor):
         if self.state.logicState == "SubmittingOrder":
             self.state.logicState = "Observing"
         return
     
-    def onOrderOpened(self, order_info: OrderInformation):
+    def onOrderOpened(self, order_info: OrderDescriptor):
         if self.state.logicState == "SubmittingOrder":
             self.state.logicState = "Observing"
         return
 
-    def onFilled(self, order_info: OrderInformation):
+    def onFilled(self, order_info: OrderDescriptor):
         order_action = order_info.orderInfo.action
         executed_orders = self.state.executedOrders
 
@@ -433,7 +433,7 @@ class ConstantStepOffsetTrader(TraderLogic):
                         " lastFillPrice: " + str(order_info.lastFillPrice))
         
 
-    def onOrderError(self, order_info: OrderInformation):
+    def onOrderError(self, order_info: OrderDescriptor):
         super().onOrderError(order_info)
         errorAndNotify("Something went Wrong: " + order_info.errorState.errorString + 
                        " Error Code: " + str(order_info.errorState.errorCode))

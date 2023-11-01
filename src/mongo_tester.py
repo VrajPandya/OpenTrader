@@ -1,5 +1,5 @@
-from trader_mongo.TraderMongoInterface import MongoInterfaceManager, OrderInformationCodec
-from state_tracking.OrderSubscription import OrderInformation
+from trader_mongo.TraderMongoInterface import MongoInterfaceManager, OrderDescriptorCodec
+from state_tracking.OrderSubscription import OrderDescriptor
 from ibkr_app.utils.contract_helper import createContractDescriptor
 from ibkr_app.utils.order_helper import *
 from decimal import Decimal, getcontext
@@ -19,11 +19,11 @@ class CustomTraderCodec(TypeCodec):
     bson_type = dict
     def __init__(self):
         super().__init__()
-        self.order_information_codec = OrderInformationCodec()
+        self.order_descriptor_codec = OrderDescriptorCodec()
 
     def transform_python(self, value):
         result = {}
-        result["order_info"] = self.order_information_codec.transform_python(value.order_info)
+        result["order_info"] = self.order_descriptor_codec.transform_python(value.order_info)
         result["execution_step"] = value.execution_step
         result["baseline"] = value.baseline
         return result
@@ -31,7 +31,7 @@ class CustomTraderCodec(TypeCodec):
     def transform_bson(self, value):
         # print(value)
         trade_state_info = value["executed_order"]
-        result = CustomTraderState(self.order_information_codec.transform_bson(trade_state_info["order_info"]),
+        result = CustomTraderState(self.order_descriptor_codec.transform_bson(trade_state_info["order_info"]),
                                    trade_state_info["execution_step"],
                                    trade_state_info["baseline"])
         return result
@@ -44,7 +44,7 @@ def main():
     order_desc = create_limit_order("BUY", "Minutes", buy_quantity, float(targetPrice))
     order_desc.orderId = 3
 
-    order_to_add = OrderInformation(contract_info=btc_contract, order=order_desc)
+    order_to_add = OrderDescriptor(contract_info=btc_contract, order=order_desc)
     
     custom_trader_codec = CustomTraderCodec()
     type_registry = TypeRegistry([custom_trader_codec])

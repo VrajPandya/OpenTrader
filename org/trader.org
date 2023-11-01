@@ -5,7 +5,12 @@
 Org file for OpenTrader.
 
 * TODO HIPRI Bugs
+:PROPERTIES:
+:VISIBILITY: children
+:END:
 ** TODO State transition doesn't work as expected when the price goes below the baseline then up.
+
+It's possible this happens on Gemini since we have essentially multi threaded processing for the price and the order stream.
 
 * TODO Overall Refactor
 :PROPERTIES:
