@@ -1,0 +1,8 @@
+{
+"Gemini" : {
+    "BTCUSD": {
+            "fees" : 0.4,
+            "structure" : "OrderSize"
+        }
+}
+}
