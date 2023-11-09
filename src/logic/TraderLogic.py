@@ -7,6 +7,7 @@ from ibapi.contract import Contract
 from state_tracking.OrderSubscription import OrderDescriptor 
 from telegram_notifications.TelegramNotifications import TelegramNotificationsManager
 from pathlib import Path
+from threading import Lock
 import json
 from os import listdir
 
@@ -44,6 +45,7 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         OrderSubscription.__init__(self)
         self.confDir = "TraderLogicConfigs"
         self.logicName = "NONE"
+        self.executionLock = Lock()
 
     def haltLogic(self):
         errorAndNotify("Halting the trader logic" + self.logicName)
