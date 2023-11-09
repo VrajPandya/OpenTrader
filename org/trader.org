@@ -9,23 +9,14 @@ Org file for OpenTrader.
 :VISIBILITY: children
 :END:
 ** TODO State transition doesn't work as expected when the price goes below the baseline then up.
-
 It's possible this happens on Gemini since we have essentially multi threaded processing for the price and the order stream.
-
-* TODO Overall Refactor
-:PROPERTIES:
-:VISIBILITY: children
-:END:
-** TODO Rename OrderInfo to OrderDescriptor.
-=======
-Need the rename soon!
 
 * TODO State machine resetting
 :PROPERTIES:
 :VISIBILITY: children
 :END:
 Every Trading Logic will have to implement custom methods to store its state.
-** TODO Test state machine resetting with ibkr to test the validity.
+** DONE Test state machine resetting with ibkr to test the validity.
 ** TODO ensure the overall state saving works as expected.
 ** DONE Mongo needs an update/upsert/replace call not insert.
 ** DONE Test state machine resetting with backtesting.
@@ -38,6 +29,7 @@ Every Trading Logic will have to implement custom methods to store its state.
 ** TODO Integrate Order placement REST APIs.
 Rant:It's really sad that Gemini doesn't have websocket API for placing orders.
 ** TODO Test state machine management with Gemini!!!!
+Found the problem! quick fix might be just adding a simple mutex to the logic interface.
 ** DONE Integrate Order event subscription websockets
 ** DONE Use higher frequency data stream for Gemini.
 ** DONE integrate Gemini price fetching API
@@ -179,6 +171,14 @@ No need. The state machine manipulations are very fast. We can only have bugs in
 :END:
 ** TODO remove all the private keys/telegram chat id from source and source tree.
 ** TODO remove all the things from the commit history
+
+* DONE Overall Refactor
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+** DONE Rename OrderInfo to OrderDescriptor.
+=======
+Need the rename soon!
 
 * DONE Data storage Interface
 We will have to use the MongoDB to store all our records for orders.

@@ -42,14 +42,6 @@ class OrderSubscription:
     def __init__(self):
         return
 
-    # def setOrderInterface(self, order_interface : IBKRApp):
-    #     self.ibkrApp = order_interface
-
-    # def submitOrder(self, orderInfo : OrderDescriptor):
-    #     order_id = self.ibkrApp.placeOrder(orderInfo)
-    #     logging.info(f"Submitted Order for orderID: " + order_id)
-    #     return order_id
-
     def onSubmitted(self, order_info : OrderDescriptor):
         pass
 

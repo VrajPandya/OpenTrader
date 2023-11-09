@@ -5,6 +5,7 @@ from state_tracking.OrderSubscription import OrderDescriptor
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibkr_app.utils.contract_helper import createContractDescriptor
 import matplotlib.pyplot as plt
+import MockFeeStructure as mfs
 import numpy as np
 
 CSV_DATA_PATH = "/Users/vrajpandya/repo/OpenTrader/data/btc_historical_data_1_copy.csv"
@@ -21,6 +22,7 @@ class BackTester:
         self.inFlightOrders = []
         self.currentTickTime = 0
         self.currentTick = 0
+        self.feeStructure = mfs.FeeStructure()
         self.csvFile = open(self.csv_data_path, "r")
         self.csvReader = csv.reader(self.csvFile)
         self.strategy.setOrderAPI(self)
@@ -69,6 +71,7 @@ class BackTester:
                 self.plot_y.append(curPrice)
                 order.orderInfo.status = "FILLED"
                 order.currentFill = order.orderInfo.totalQuantity
+                self.feeStructure.get_fee(order)
                 order.currentRemaining = 0
                 order.currentAvgFillPrice = curPrice
                 order.avgFillPrice = curPrice

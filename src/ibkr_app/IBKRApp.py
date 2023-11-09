@@ -3,7 +3,8 @@ from ibapi.wrapper import EWrapper
 from ibapi.contract import Contract
 from ibapi.utils import iswrapper
 from ibapi.order_state import OrderState
-
+from ibapi.commission_report import CommissionReport
+from ibapi.execution import Execution
 from ibapi import ticktype as IBTickType
 from ibapi.order import Order
 
@@ -60,6 +61,8 @@ class IBKRApp(EWrapper, EClient):
     def releaseTraderLogic(self, logic):
         # TODO: Implement
         pass
+        # logic.unsetOrderAPI()
+        # self.unbindContractSubscription(logic)
 
     def bindContractSubscription(self, traderLogic: TraderLogic):
         for contract_descriptor in traderLogic.priceSubscriptionList:
@@ -71,8 +74,19 @@ class IBKRApp(EWrapper, EClient):
                 request_id = self.nextOrderId()
                 print("requesting market data")
                 self.reqMktData(request_id, contract_descriptor, '', False, False, [])
-                # TODO : write logic in a way we can verify that the requested Market data stream is successfully opened
+                # TODO : verify that the requested Market data stream is successfully opened
                 self.priceTracker.trackPriceSubscription(contract_descriptor, request_id, traderLogic)
+
+    def unbindContractSubscription(self, traderLogic: TraderLogic):
+        pass
+        # for contract_descriptor in traderLogic.priceSubscriptionList:
+        #     try:
+        #         request_id = self.priceTracker.contractToRequestID[contract_descriptor]
+        #         self.cancelMktData(request_id)
+        #         self.priceTracker.removePriceSubscription(contract_descriptor)
+        #     except KeyError:
+        #         print("KeyError: ", contract_descriptor)
+        #         pass
                 
     @iswrapper
     def error(self, reqId: int, errorCode: int, errorString: str, advancedOrderRejectJson = ""):
@@ -198,6 +212,13 @@ class IBKRApp(EWrapper, EClient):
             # Maybe log? but why? I can see the TWS.
             return
                 
+    def execDetails(self, reqId: int, contract: Contract, execution: Execution):
+        super().execDetails(reqId, contract, execution)
+        print("ExecDetails. ReqId:", reqId, "Symbol:", contract.symbol, "SecType:", contract.secType, "Currency:", contract.currency, execution)
+
+    def commissionReport(self, commissionReport: CommissionReport):
+        super().commissionReport(commissionReport)
+        print("CommissionReport.", commissionReport)
 
     # this wrapper method will set the correct reqID in "self.nextValidOrderID"
     @iswrapper

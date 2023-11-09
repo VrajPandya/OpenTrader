@@ -1,5 +1,7 @@
 from state_tracking.OrderSubscription import OrderSubscription
 from state_tracking.PriceSubscription import PriceSubscription
+from ibapi.commission_report import CommissionReport
+from ibapi.execution import Execution
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibapi.contract import Contract
 from state_tracking.OrderSubscription import OrderDescriptor 
@@ -52,20 +54,29 @@ class TraderLogic(OrderSubscription, PriceSubscription):
     
     def setOrderAPI(self, order_api):
         self.orderAPI = order_api
+
+    def unsetOrderAPI(self):
+        self.orderAPI = None
     
     def onPriceUpdate(self, updated_price: float, contract_for_update: Contract):
         pass
 
-    def onRejected(self, orderInfo : OrderDescriptor):
+    def onRejected(self, order_desc : OrderDescriptor):
         pass
 
-    def onCanceled(self, orderInfo : OrderDescriptor):
+    def onCanceled(self, order_desc : OrderDescriptor):
         pass
 
-    def onAccepted(self, orderInfo : OrderDescriptor):
+    def onAccepted(self, order_desc : OrderDescriptor):
         pass
 
-    def onFilled(self, orderInfo : OrderDescriptor):
+    def onFilled(self, order_desc : OrderDescriptor):
+        pass
+
+    def onExecDetails(self, order_desc : OrderDescriptor, execution : Execution):
+        pass
+
+    def onCommissionReport(self, order_desc : OrderDescriptor, commission_report : CommissionReport):
         pass
 
     def saveState(self):
