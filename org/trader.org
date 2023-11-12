@@ -1,6 +1,6 @@
 #+title: Open Trader
 #+author: Vraj Pandya
-#+date:File 2023-1-15
+#+date:File 2023-11-12
 #+STARTUP: overview
 Org file for OpenTrader.
 
@@ -8,40 +8,19 @@ Org file for OpenTrader.
 :PROPERTIES:
 :VISIBILITY: children
 :END:
+** TODO Test Thread safety 
 ** TODO State transition doesn't work as expected when the price goes below the baseline then up.
 It's possible this happens on Gemini since we have essentially multi threaded processing for the price and the order stream.
-
-* TODO State machine resetting
+Implemented thread safety
+* TODO Implement Mock Fee structure
+* TODO Implement CSV output for analysis
+* TODO Implement Order context writing for offline analysis
+* TODO Setup CLI Interface
 :PROPERTIES:
-:VISIBILITY: children
+:VISIBILITY: folded
 :END:
-Every Trading Logic will have to implement custom methods to store its state.
-** DONE Test state machine resetting with ibkr to test the validity.
-** TODO ensure the overall state saving works as expected.
-** DONE Mongo needs an update/upsert/replace call not insert.
-** DONE Test state machine resetting with backtesting.
-** DONE find a way to serialize save the Trader logic state machine to disk.
-- Most likely, we simply save everything to state machine dict variable and write a method to serialize the dict to json and back.
-- We have decided to go with mongo to store the state of the trader logic.
-** DONE Impliment a method to restore the state machine from disk.
-** DONE write codec for state machine
-* TODO Gemini Integration
-** TODO Integrate Order placement REST APIs.
-Rant:It's really sad that Gemini doesn't have websocket API for placing orders.
-** TODO Test state machine management with Gemini!!!!
-Found the problem! quick fix might be just adding a simple mutex to the logic interface.
-** DONE Integrate Order event subscription websockets
-** DONE Use higher frequency data stream for Gemini.
-** DONE integrate Gemini price fetching API
-Started with 1 minute bars. Don't need more granular info for now.
-Getting Realtime socket is just too much for a start.
-* TODO Implement logic termination condition
-We don't expect a logic to go on forever.
-We need to be able to set some condition which logic itself can check and then decide to gracefully terminate itself.
-Conditions:
-1. Number of successful profit takes
-2. offset from the current price to operational range.
-
+** TODO Publisher Side Implementation
+** TODO Subscriber side Implementation
 * TODO Implement pubsub
 The Current two level dict lookups to find the correct logic to update the price on is a kind of a pubsub. The question is what is the level of surity we need.
 Do we need process isolation between logics? So far I think we do.
@@ -54,12 +33,13 @@ Do we need process isolation between logics? So far I think we do.
 5) message should be dequeued when the all the existing subscribers have recived the message.
 
 
-* TODO Setup CLI Interface
-:PROPERTIES:
-:VISIBILITY: folded
-:END:
-** TODO Publisher Side Implementation
-** TODO Subscriber side Implementation
+* TODO Implement logic termination condition
+We don't expect a logic to go on forever.
+We need to be able to set some condition which logic itself can check and then decide to gracefully terminate itself.
+Conditions:
+1. Number of successful profit takes
+2. offset from the current price to operational range.
+3. Take intrupt/signal from the external interface.
 
 * TODO Option chain
 :PROPERTIES:
@@ -165,6 +145,30 @@ No need. The state machine manipulations are very fast. We can only have bugs in
 
 
 
+* DONE Gemini Integration
+** DONE Integrate Order placement REST APIs.
+Rant:It's really sad that Gemini doesn't have websocket API for placing orders.
+** DONE Test state machine management with Gemini!!!!
+Found the problem! quick fix might be just adding a simple mutex to the logic interface.
+** DONE Integrate Order event subscription websockets
+** DONE Use higher frequency data stream for Gemini.
+** DONE integrate Gemini price fetching API
+Started with 1 minute bars. Don't need more granular info for now.
+Getting Realtime socket is just too much for a start.
+* DONE State machine resetting
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+Every Trading Logic will have to implement custom methods to store its state.
+** DONE Test state machine resetting with ibkr to test the validity.
+** DONE ensure the overall state saving works as expected.
+** DONE Mongo needs an update/upsert/replace call not insert.
+** DONE Test state machine resetting with backtesting.
+** DONE find a way to serialize save the Trader logic state machine to disk.
+- Most likely, we simply save everything to state machine dict variable and write a method to serialize the dict to json and back.
+- We have decided to go with mongo to store the state of the trader logic.
+** DONE Impliment a method to restore the state machine from disk.
+** DONE write codec for state machine
 * DONE Make Code sharable
 :PROPERTIES:
 :VISIBILITY: folded
