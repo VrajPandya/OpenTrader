@@ -287,7 +287,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         if (target_price - self.currentPrice) < self.stateTransitionThreshold:
             self.placeSellOrder(target_price, placed_order_descriptor.orderInfo.totalQuantity, self.currentStep)
 
-    def onPriceUpdateImpl(self, updated_price : Decimal, contract_descriptor: Contract):
+    def onPriceUpdateImpl(self, updated_price : float, contract_descriptor: Contract):
         currentStateOfLogic = self.state.logicState
         self.updatePriceStates(updated_price)
 
@@ -328,10 +328,6 @@ class ConstantStepOffsetTrader(TraderLogic):
             errorAndNotify("Reached Undefined state in OnPriceUpdate in ConstantOffset Update Logic")
             raise UnexpectedStateTransition()
         return
-
-    def onPriceUpdate(self, updated_price : Decimal, contract_descriptor: Contract):
-        with self.executionLock:
-            self.onPriceUpdateImpl(updated_price, contract_descriptor)
         
     def onSubmitterImpl(self, order_info: OrderDescriptor):
         executedOrders = self.state.executedOrders
@@ -361,14 +357,6 @@ class ConstantStepOffsetTrader(TraderLogic):
         self.upsertExecutedOrderState(order_info, orderStep)
         return
 
-    def onSubmitted(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onSubmitterImpl(order_info)
-        
-    def onRejected(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onRejectedImpl(order_info)
-
     def onRejectedImpl(self, order_info: OrderDescriptor):
         inProgressOrderStep = self.getOrderStep(order_info)
         orderAction = order_info.orderInfo.action
@@ -381,11 +369,6 @@ class ConstantStepOffsetTrader(TraderLogic):
             self.state.logicState = "Observing"
         infoAndNotify("Rejected " + order_info.orderInfo.action \
                        +"order! For Price: " + str(order_info.orderInfo.lmtPrice))
-        
-
-    def onCanceled(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onCanceledImpl(order_info)
 
     def onCanceledImpl(self, order_info: OrderDescriptor):
         inProgressOrderStep = self.getOrderStep(order_info)
@@ -401,10 +384,6 @@ class ConstantStepOffsetTrader(TraderLogic):
         infoAndNotify("Rejected " + order_info.orderInfo.action \
                        +"order! For Price: " + str(order_info.orderInfo.lmtPrice))
     
-    def onAccepted(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onAcceptedImpl(order_info)
-
     ## FYI: On Accepted is called when the IBKR server accepts the order.
     ##      This does NOT mean that the order has been filled.
     def onAcceptedImpl(self, order_info: OrderDescriptor):
@@ -412,10 +391,6 @@ class ConstantStepOffsetTrader(TraderLogic):
             self.state.logicState = "Observing"
         return
     
-    def onOrderOpened(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onOrderOpenedImpl(order_info)
-
     def onOrderOpenedImpl(self, order_info: OrderDescriptor):
         if self.state.logicState == "SubmittingOrder":
             self.state.logicState = "Observing"
@@ -458,10 +433,6 @@ class ConstantStepOffsetTrader(TraderLogic):
         infoAndNotify(action_str + "! Quatity: " + str(order_info.orderInfo.totalQuantity) +
                         " avgFillPrice: " + str(order_info.currentAverageFillPrice) +
                         " lastFillPrice: " + str(order_info.lastFillPrice))
-        
-    def onOrderError(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onOrderErrorImpl(order_info)
 
     def onOrderErrorImpl(self, order_info: OrderDescriptor):
         super().onOrderError(order_info)

@@ -51,8 +51,8 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         errorAndNotify("Halting the trader logic" + self.logicName)
         exit()
 
-    def submitOrder(self, order_info):
-        return self.orderAPI.placeOrderAndSubscribe(order_info, self)
+    def submitOrder(self, order_desc):
+        return self.orderAPI.placeOrderAndSubscribe(order_desc, self)
     
     def setOrderAPI(self, order_api):
         self.orderAPI = order_api
@@ -60,25 +60,75 @@ class TraderLogic(OrderSubscription, PriceSubscription):
     def unsetOrderAPI(self):
         self.orderAPI = None
     
-    def onPriceUpdate(self, updated_price: float, contract_for_update: Contract):
-        pass
+    def onPriceUpdate(self, updated_price : float, contract_descriptor: Contract):
+        with self.executionLock:
+            self.onPriceUpdateImpl(updated_price, contract_descriptor)
+    
+    def onRejected(self, order_desc: OrderDescriptor):
+        with self.executionLock:
+            self.onRejectedImpl(order_desc)
 
-    def onRejected(self, order_desc : OrderDescriptor):
-        pass
+    def onCanceled(self, order_desc: OrderDescriptor):
+        with self.executionLock:
+            self.onCanceledImpl(order_desc)
 
-    def onCanceled(self, order_desc : OrderDescriptor):
-        pass
-
-    def onAccepted(self, order_desc : OrderDescriptor):
-        pass
+    def onAccepted(self, order_desc: OrderDescriptor):
+        with self.executionLock:
+            self.onAcceptedImpl(order_desc)
 
     def onFilled(self, order_desc : OrderDescriptor):
-        pass
+        with self.executionLock:
+            self.onFilledImpl(order_desc)
 
-    def onExecDetails(self, order_desc : OrderDescriptor, execution : Execution):
-        pass
+    def onExecDetails(self, order_desc : OrderDescriptor, execution_report : Execution):
+        with self.executionLock:
+            self.onExecDetailsImpl(order_desc, execution_report)
 
     def onCommissionReport(self, order_desc : OrderDescriptor, commission_report : CommissionReport):
+        with self.executionLock:
+            self.onCommissionReportImpl(order_desc, commission_report)
+
+    def onSubmitted(self, order_desc: OrderDescriptor):
+        with self.executionLock:
+            self.onSubmitterImpl(order_desc)
+
+    def onOrderOpened(self, order_desc: OrderDescriptor):
+        with self.executionLock:
+            self.onOrderOpenedImpl(order_desc)
+
+    def onOrderError(self, order_desc: OrderDescriptor):
+        with self.executionLock:
+            self.onOrderErrorImpl(order_desc)
+
+    def onPriceUpdateImpl(self, updated_price: float, contract_for_update: Contract):
+        pass
+
+    def onRejectedImpl(self, order_desc : OrderDescriptor):
+        pass
+
+    def onCanceledImpl(self, order_desc : OrderDescriptor):
+        pass
+
+    def onAcceptedImpl(self, order_desc : OrderDescriptor):
+        pass
+
+    def onFilledImpl(self, order_desc : OrderDescriptor):
+        pass
+
+
+    def onSubmitterImpl(self, order_desc: OrderDescriptor):
+        pass
+
+    def onOrderOpenedImpl(self, order_desc: OrderDescriptor):
+        pass
+
+    def onOrderErrorImpl(self, order_desc: OrderDescriptor):
+        pass
+
+    def onExecDetailsImpl(self, order_desc : OrderDescriptor, execution : Execution):
+        pass
+
+    def onCommissionReportImpl(self, order_desc : OrderDescriptor, commission_report : CommissionReport):
         pass
 
     def saveState(self):
