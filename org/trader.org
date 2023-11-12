@@ -33,6 +33,10 @@ Do we need process isolation between logics? So far I think we do.
 5) message should be dequeued when the all the existing subscribers have recived the message.
 
 
+* TODO containerize all the process.
+Since we seem to have a lot and we will have even more.
+Since we need process level isolation for individual Logic 
+
 * TODO Implement logic termination condition
 We don't expect a logic to go on forever.
 We need to be able to set some condition which logic itself can check and then decide to gracefully terminate itself.
@@ -57,6 +61,15 @@ Conditions:
 ** TODO Implement a demo app that fetches tickers from watch list and monitors it.
 
 
+
+* TODO Overall Refactor
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+** TODO script to shut the environment down.
+** DONE Rename OrderInfo to OrderDescriptor.
+=======
+Need the rename soon!
 
 * TODO Ticker/Contract profit taker spread derivation
 :PROPERTIES:
@@ -110,12 +123,13 @@ Con:
 ** TODO write up a simple data back up script for latest data. 
 ** TODO hook up data backup with Onedrive/some cloud storage.
 ** DONE Implement modular data collection script
-* TODO Future Enhancements
+* DONE Future Enhancements
 :PROPERTIES:
 :VISIBILITY: folded
 :END:
-** TODO Optimize Path to update onPrice Update.
+** DONE Optimize Path to update onPrice Update.
 We are doing a lot of dictionary lookups. That must be Costing a TON. 
+We might as well do a pubsub. Must have
 ** DONE OrderTracker
 *** DONE Make OrderTracker Thread safe.
 We use order tracking from IBKR. No need to implement something custom.
@@ -156,9 +170,6 @@ Found the problem! quick fix might be just adding a simple mutex to the logic in
 Started with 1 minute bars. Don't need more granular info for now.
 Getting Realtime socket is just too much for a start.
 * DONE State machine resetting
-:PROPERTIES:
-:VISIBILITY: children
-:END:
 Every Trading Logic will have to implement custom methods to store its state.
 ** DONE Test state machine resetting with ibkr to test the validity.
 ** DONE ensure the overall state saving works as expected.
@@ -175,14 +186,6 @@ Every Trading Logic will have to implement custom methods to store its state.
 :END:
 ** TODO remove all the private keys/telegram chat id from source and source tree.
 ** TODO remove all the things from the commit history
-
-* DONE Overall Refactor
-:PROPERTIES:
-:VISIBILITY: children
-:END:
-** DONE Rename OrderInfo to OrderDescriptor.
-=======
-Need the rename soon!
 
 * DONE Data storage Interface
 We will have to use the MongoDB to store all our records for orders.
