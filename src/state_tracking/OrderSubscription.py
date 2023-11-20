@@ -66,6 +66,12 @@ class OrderSubscription:
     def onInactive(self, order_info: OrderDescriptor):
         pass
 
+    def onExecDetails(self, order_info : OrderDescriptor, execution_report):
+        pass
+
+    def onCommissionReport(self, order_info : OrderDescriptor, commission_report):
+        pass
+    
     def onOrderError(self, order_info: OrderDescriptor):
         # TODO: handle cases where we have received the order staus
         # but not the error and all the permutations of the event chain

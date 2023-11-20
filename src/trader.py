@@ -15,16 +15,17 @@ IBFATEWAY_PROD_PORT = 4001
 LOCAL_HOST = "127.0.0.1"
 
 #######################################################################
-### IMP NOTE: DON't USE CLIENT ID 0
-### Client ID 0 is for privilaged clients like TWS only
-### Client 0 is able to reqest already placed orders
+### IMP NOTE: DON't USE CLIENT ID 0.
+### Client ID 0 is for privilaged clients like TWS only.
+### Client 0 is able to reqest already placed orders.
+### We are setting 5 as master client ID from the TWS configuration.
 TRADER_BOT_CLIENT_ID = 5
 #######################################################################
 
 
 # setup data feed with
 # data feed could be from IBKR or Gemini. It doesn't matter.
-def setup_and_run_trading_app(app : IBKRApp, isPaper=False, logToConsole=False):
+def setup_and_run_trading_app(app : IBKRApp, isPaper=True, logToConsole=False):
     
     app_setup.SetupLogger(logToConsole)
     

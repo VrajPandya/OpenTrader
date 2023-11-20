@@ -52,7 +52,6 @@ class ConstantStepOffsetTrader(TraderLogic):
                                  order_info: OrderDescriptor, 
                                  orderStep: int,
                                  state_to_update : str = "executed_order"):
-        # used https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.update_one
         query = { "$and" : [\
             {"executed_order.logic_state_id" : self.mongo_logic_state_id},\
             {"executed_order.execution_step": orderStep}\

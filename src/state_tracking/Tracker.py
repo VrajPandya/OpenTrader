@@ -1,6 +1,8 @@
 from state_tracking.OrderSubscription import OrderSubscription, OrderDescriptor
 from ibapi.contract import Contract
 from logic import TraderLogic
+from ibapi.commission_report import CommissionReport
+from ibapi.execution import Execution
 import logging
 
 ### Order Tracker only tracks the orders that are Orders on an instrument.
@@ -24,7 +26,7 @@ class OrderTracker:
     def stopTrackingOrder(self, orderID: int):
         removed_order = self.orderIDToSubscriber.pop(orderID, None)
         if removed_order == None:
-            logging.error(f"Unexpected request to stop order Tracking for orderID: " + orderID)
+            logging.error(f"Unexpected request to stop order Tracking for orderID: {orderID}")
 
 
 ### Price Tracker tracks the Price tracking subscriptions.
@@ -62,3 +64,53 @@ class PriceTracker:
         
         self.contractToRequestID[contract_descriptor] = request_id
         self.requestIDToContract[request_id] = contract_descriptor
+
+## IBKR Decides to send a number of "Executions" for single OrderID.
+## IBKR Sends a single Commission Report for an Order.
+## We need a way to track all the executions for a single orderID.
+## Execution Tracker tracks all the executions for a single orderID.
+## Execution ID to OrderID mapping is needed since,
+## IBKR only sends Execution ID in the Commission Report.
+
+class ExecutionTracker:
+    executionIDToOrderID : dict[str, int]
+    orderIDToExecutions : dict[int, list[Execution]]
+    orderIDToCommissionReport : dict[int, CommissionReport]
+
+    def __init__(self):
+        self.executionIDToOrderID = dict()
+        self.orderIDToExecutions = dict()
+        self.orderIDToCommissionReport = dict()
+
+    def trackExecution(self, execution: Execution, orderID: int):
+        executionID = execution.execId
+        self.executionIDToOrderID[executionID] = orderID
+        try:
+            existing_list = self.orderIDToExecutions[orderID]
+            existing_list.append(execution)
+        except KeyError:
+            new_list = []
+            new_list.append(execution)
+            self.orderIDToExecutions[orderID] = new_list
+
+    def trackCommissionReport(self, commission_report: CommissionReport, orderID: int):
+        self.orderIDToCommissionReport[orderID] = commission_report
+
+    def getExecutionsForOrderID(self, orderID: int):
+        return self.orderIDToExecutions[orderID]
+
+    def getCommissionReportForOrderID(self, orderID: int):
+        return self.orderIDToCommissionReport[orderID]
+
+    def getOrderIDForExecutionID(self, executionID: str):
+        return self.executionIDToOrderID[executionID]
+
+    def stopTrackingForOrderID(self, orderID: int):
+        executions = self.orderIDToExecutions[orderID]
+        self.orderIDToExecutions.pop(orderID, None)
+        self.orderIDToCommissionReport.pop(orderID, None)
+        for execution in executions:
+            self.executionIDToOrderID.pop(execution.execId, None)
+
+    def stopTrackingForExecutionID(self, executionID: str):
+        self.executionIDToOrderID.pop(executionID, None)

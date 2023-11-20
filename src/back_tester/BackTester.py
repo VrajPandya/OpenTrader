@@ -5,8 +5,9 @@ from state_tracking.OrderSubscription import OrderDescriptor
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibkr_app.utils.contract_helper import createContractDescriptor
 import matplotlib.pyplot as plt
-import MockFeeStructure as mfs
-import numpy as np
+from MockFeeStructure import FeeStructure
+from ibapi.execution import Execution
+from ibapi.commission_report import CommissionReport
 
 CSV_DATA_PATH = "/Users/vrajpandya/repo/OpenTrader/data/btc_historical_data_1_copy.csv"
 
@@ -22,7 +23,7 @@ class BackTester:
         self.inFlightOrders = []
         self.currentTickTime = 0
         self.currentTick = 0
-        self.feeStructure = mfs.FeeStructure()
+        self.feeStructure = FeeStructure("default_fees.json")
         self.csvFile = open(self.csv_data_path, "r")
         self.csvReader = csv.reader(self.csvFile)
         self.strategy.setOrderAPI(self)
@@ -67,19 +68,29 @@ class BackTester:
                     self.color_map.append("red")
 
             if order_executed:
-                self.plot_x.append(self.currentTick)
-                self.plot_y.append(curPrice)
+                # Update the order state
                 order.orderInfo.status = "FILLED"
                 order.currentFill = order.orderInfo.totalQuantity
-                self.feeStructure.get_fee(order)
+                
                 order.currentRemaining = 0
                 order.currentAvgFillPrice = curPrice
                 order.avgFillPrice = curPrice
                 order.lastFillPrice = curPrice
+                order.orderInfo.filledQuantity = order.orderInfo.totalQuantity
+                order.remainingQuantity = 0
+                
+                
+                # Update backtester state
                 self.executedOrders.append(order)
                 self.openOrders.remove(order)
+                
+                # Call the backtested strategy 
                 self.strategy.onFilled(order)
                     
+                # Update the plot
+                self.plot_x.append(self.currentTick)
+                self.plot_y.append(curPrice)
+                
 
 
         # call update price

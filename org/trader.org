@@ -4,6 +4,18 @@
 #+STARTUP: overview
 Org file for OpenTrader.
 
+* TODO Implement Mock Fee structure
+** TODO Implement Handling Execution Details response
+*** TODO Implement Execution ID to OrderID and OrderID to Execution ID mapping.
+*** TODO Figure out the cardinality between OrderID <=> Execution ID <=> Commission Report.
+If the Cardinality between Execution ID and Commission is 1:1, Folks at IBKR are idiots or lazy or both.
+WoW: https://interactivebrokers.github.io/tws-api/classIBApi_1_1Execution.html
+If we expect the executions to be overridable, why do we need the commission report to be seperate?
+We always attempt to get the Commission report for the latest exec ID and and will have to
+assert an error in case we don't get it! It's also posssible to request all the commissions.
+*** TODO Implement error assertions
+*** TODO Implement error handling.
+** TODO Implement Handling Commission Report
 * TODO HIPRI Bugs
 :PROPERTIES:
 :VISIBILITY: children
@@ -12,7 +24,6 @@ Org file for OpenTrader.
 ** TODO State transition doesn't work as expected when the price goes below the baseline then up.
 It's possible this happens on Gemini since we have essentially multi threaded processing for the price and the order stream.
 Implemented thread safety
-* TODO Implement Mock Fee structure
 * TODO Implement CSV output for analysis
 * TODO Implement Order context writing for offline analysis
 * TODO Setup CLI Interface

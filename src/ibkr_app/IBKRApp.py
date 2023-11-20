@@ -39,6 +39,8 @@ class IBKRApp(EWrapper, EClient):
         self.orderTracker = Tracker.OrderTracker()
         # in memory price subscription tracker
         self.priceTracker = Tracker.PriceTracker()
+        # in memory execution tracker OrderID<=>ExecutionID
+        self.executionTracker = Tracker.ExecutionTracker()
         self.traderLogicList = trader_logic_to_bind
         
         # app_setup.SetupLogger()
@@ -105,8 +107,8 @@ class IBKRApp(EWrapper, EClient):
                 logic.onOrderError
             return
         if order_subscriber != None:
-            order_info = self.orderTracker.orderIDToOrderDescriptor[reqId]
-            order_subscriber.onCanceled(order_info)
+            order_desc = self.orderTracker.orderIDToOrderDescriptor[reqId]
+            order_subscriber.onCanceled(order_desc)
             return
         
         errorAndNotify("ERROR: " + errorString + " " + str(errorCode) + " " + str(reqId))
@@ -133,12 +135,12 @@ class IBKRApp(EWrapper, EClient):
     def openOrder(self, orderID: int, contract: Contract, order: Order, orderState: OrderState):
         super().openOrder(orderID, contract, order, orderState)
         order_subscriber = self.orderTracker.orderIDToSubscriber[orderID]
-        order_info = self.orderTracker.orderIDToOrderDescriptor[orderID]
-        order_info.orderInfo = order
-        order_info.contractInfo = contract
-        order_info.IBKROrderState = orderState
-        order_info.orderState = "ORDER_OPENED"
-        order_subscriber.onOrderOpened(order_info)
+        order_desc = self.orderTracker.orderIDToOrderDescriptor[orderID]
+        order_desc.orderInfo = order
+        order_desc.contractInfo = contract
+        order_desc.IBKROrderState = orderState
+        order_desc.orderState = "ORDER_OPENED"
+        order_subscriber.onOrderOpened(order_desc)
 
     # Order status copied from https://interactivebrokers.github.io/tws-api/order_submission.html#order_status for IBAPI v 10.x
     # NOTE:  Often there are duplicate orderStatus messages.
@@ -164,46 +166,46 @@ class IBKRApp(EWrapper, EClient):
                     clientId: int, whyHeld: str, mktCapPrice: float):
         super().orderStatus(orderID, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice)
         subscriber = self.orderTracker.orderIDToSubscriber[orderID]
-        order_info = self.orderTracker.orderIDToOrderDescriptor[orderID]
-        order_info.currentFill = filled
-        order_info.currentRemaining = remaining
-        order_info.currentAverageFillPrice = avgFillPrice
-        order_info.orderInfo.permId = permId
-        order_info.orderInfo.parentId = parentId
-        order_info.lastFillPrice = lastFillPrice
-        order_info.orderInfo.clientId = clientId
-        order_info.whyHeld = whyHeld
-        order_info.marketCapPrice = mktCapPrice
+        order_desc = self.orderTracker.orderIDToOrderDescriptor[orderID]
+        order_desc.currentFill = filled
+        order_desc.currentRemaining = remaining
+        order_desc.currentAverageFillPrice = avgFillPrice
+        order_desc.orderInfo.permId = permId
+        order_desc.orderInfo.parentId = parentId
+        order_desc.lastFillPrice = lastFillPrice
+        order_desc.orderInfo.clientId = clientId
+        order_desc.whyHeld = whyHeld
+        order_desc.marketCapPrice = mktCapPrice
         ##################
         
         ##################
         # if status == "PreSubmitted":
-        #     order_info.orderState = "SUBMITTED"
-        #     subscriber.onOrderOpened(order_info)
+        #     order_desc.orderState = "SUBMITTED"
+        #     subscriber.onOrderOpened(order_desc)
         #     return
         if status == "Submitted" or status == "PreSubmitted":
-            order_info.orderState = "SUBMITTED"
-            subscriber.onSubmitted(order_info)
+            order_desc.orderState = "SUBMITTED"
+            subscriber.onSubmitted(order_desc)
             return
         elif status == "ApiCancelled":
-            order_info.orderState = "CANCELED"
-            subscriber.onCanceled(order_info)
+            order_desc.orderState = "CANCELED"
+            subscriber.onCanceled(order_desc)
             return
         elif status == "Cancelled":
-            order_info.orderState = "CANCELED"
-            subscriber.onCanceled(order_info)
+            order_desc.orderState = "CANCELED"
+            subscriber.onCanceled(order_desc)
             return
         elif status == "Filled":
-            order_info.orderState = "FILLED"
+            order_desc.orderState = "FILLED"
             if remaining > 0:
-                order_info.orderState = "PARTIALLY_FILLED"
-                subscriber.onPartiallyFilled(order_info)
+                order_desc.orderState = "PARTIALLY_FILLED"
+                subscriber.onPartiallyFilled(order_desc)
                 return
-            subscriber.onFilled(order_info)
+            subscriber.onFilled(order_desc)
             return 
         elif status == "Inactive":
-            order_info.orderState = "INACTIVE"
-            subscriber.onInactive(order_info)
+            order_desc.orderState = "INACTIVE"
+            subscriber.onInactive(order_desc)
             return
         
         # We don't need to handle these order status
@@ -211,11 +213,39 @@ class IBKRApp(EWrapper, EClient):
             # So far I am not sure what more I can do here
             # Maybe log? but why? I can see the TWS.
             return
-                
+
+
+    ## IMP NOTE: the execution detail information SHOULD be overridable
+    ## Based on the Property Discription of "Execution" class, 
+    ## https://interactivebrokers.github.io/tws-api/classIBApi_1_1Execution.html
+    ##
+    ## Property of ExecID.
+    ## 
+    ## ======================================================================
+    ##
+    ## string 	ExecId [get, set]
+    ##
+ 	## The execution's identifier. Each partial fill has a separate ExecId. 
+    ## A correction is indicated by an ExecId which differs from a previous 
+    ## ExecId in only the digits after the final period, e.g. an ExecId ending 
+    ## in ".02" would be a correction of a previous execution with an ExecId 
+    ## ending in ".01".
+    ##
+    ## ======================================================================
+    ##
+
+    @iswrapper  
     def execDetails(self, reqId: int, contract: Contract, execution: Execution):
         super().execDetails(reqId, contract, execution)
+        orderID = execution.orderId
+        subscriber = self.orderTracker.orderIDToSubscriber[orderID]
+        order_desc = self.orderTracker.orderIDToOrderDescriptor[orderID]
+
+        self.executionTracker.trackExecution(execution, orderID)
+        subscriber.onExecDetails(order_desc, execution)
         print("ExecDetails. ReqId:", reqId, "Symbol:", contract.symbol, "SecType:", contract.secType, "Currency:", contract.currency, execution)
 
+    @iswrapper
     def commissionReport(self, commissionReport: CommissionReport):
         super().commissionReport(commissionReport)
         print("CommissionReport.", commissionReport)
@@ -236,7 +266,7 @@ class IBKRApp(EWrapper, EClient):
     ## we basically ask the server to get the the order id. 
     ## We need to call this method if the orderID we locally have 
     ## doesn't work and requests fail on invalid orderID. 
-    ## Note: Kepp track of the error state machine.
+    ## Note: Keep track of the error state machine.
     ## TODO: Implement an error state machine.
      
     def nextOrderId(self) -> int:
