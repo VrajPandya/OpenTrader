@@ -1,6 +1,6 @@
 #+title: Open Trader
 #+author: Vraj Pandya
-#+date:File 2023-11-12
+#+date:File 2023-11-20
 #+STARTUP: overview
 Org file for OpenTrader.
 
@@ -16,6 +16,13 @@ assert an error in case we don't get it! It's also posssible to request all the 
 *** TODO Implement error assertions
 *** TODO Implement error handling.
 ** TODO Implement Handling Commission Report
+* TODO Implement CSV output for analysis
+** TODO Implement a Ledger Manager.
+We need a Manager since we want to modularize how to write ledger.
+This way it would be easy to go from CSV to OLAP or something else if need be.
+** TODO Figure out a Schema for Ledger Entries
+Will have to figure out Cardinality of Ledger and Entry Context data.
+For now we will use 1:1 Cardinality. Worst case we might have to consider 1:Many. But that is a very special case.
 * TODO HIPRI Bugs
 :PROPERTIES:
 :VISIBILITY: children
@@ -24,8 +31,9 @@ assert an error in case we don't get it! It's also posssible to request all the 
 ** TODO State transition doesn't work as expected when the price goes below the baseline then up.
 It's possible this happens on Gemini since we have essentially multi threaded processing for the price and the order stream.
 Implemented thread safety
-* TODO Implement CSV output for analysis
 * TODO Implement Order context writing for offline analysis
+** TODO Implement a simple context Manager.
+A simple Manager which takes in Context Codecs.
 * TODO Setup CLI Interface
 :PROPERTIES:
 :VISIBILITY: folded
