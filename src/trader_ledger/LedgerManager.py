@@ -22,7 +22,7 @@ class LedgerManager:
     def writeHeader(self):
         with open(self.file_path, 'w') as file:
             writer = csv.writer(file)
-            writer.writerow(["ID", 
+            writer.writerow(["EntryID", 
                              # Order
                              "OrderID", "ClientID", "Action", "TotalQuantity", 
                              "LimitPrice", "TimeInForce", "FilledQuantity", 
