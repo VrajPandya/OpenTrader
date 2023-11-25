@@ -23,6 +23,7 @@ class BackTester:
         self.inFlightOrders = []
         self.currentTickTime = 0
         self.currentTick = 0
+        self.currentExecutionID = 0
         self.feeStructure = FeeStructure("default_fees.json")
         self.csvFile = open(self.csv_data_path, "r")
         self.csvReader = csv.reader(self.csvFile)
@@ -79,10 +80,18 @@ class BackTester:
                 order.orderInfo.filledQuantity = order.orderInfo.totalQuantity
                 order.remainingQuantity = 0
                 
-                # Update Commission Report
+                # Update the "Execution"
+                execution = self.feeStructure.getExecution(order)
+                execution.execId = self.currentExecutionID.__str__()
+                self.strategy.onExecDetails(order, execution)
+
+                # Update the Commission Report
                 commission_report = self.feeStructure.getCommissionReport(order)
+                commission_report.execId = self.currentExecutionID.__str__()
                 self.strategy.onCommissionReport(order, commission_report)
                 
+                self.currentExecutionID += 1
+
                 # Update backtester state
                 self.executedOrders.append(order)
                 self.openOrders.remove(order)

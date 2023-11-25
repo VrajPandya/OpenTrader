@@ -82,10 +82,12 @@ class TraderLogic(OrderSubscription, PriceSubscription):
 
     def onExecDetails(self, order_desc : OrderDescriptor, execution_report : Execution):
         with self.executionLock:
+            print("Exec Details : " + str(execution_report))
             self.onExecDetailsImpl(order_desc, execution_report)
 
     def onCommissionReport(self, order_desc : OrderDescriptor, commission_report : CommissionReport):
         with self.executionLock:
+            print("Commission Report : " + str(commission_report))
             self.onCommissionReportImpl(order_desc, commission_report)
 
     def onSubmitted(self, order_desc: OrderDescriptor):

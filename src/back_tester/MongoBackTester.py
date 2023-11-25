@@ -11,7 +11,7 @@ import numpy as np
 CSV_DATA_PATH = "/Users/vrajpandya/repo/OpenTrader/data/btc_historical_data_1_copy.csv"
 
 
-BTC_CONTRACT = createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", "PAXOS")
+BTC_CONTRACT = createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", "GEMINI")
 
 class BackTester:
     def __init__(self, csv_data_path : str, strategy : TraderLogic):
