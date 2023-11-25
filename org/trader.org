@@ -6,8 +6,9 @@ Org file for OpenTrader.
 
 * TODO Implement Mock Fee structure
 ** TODO Implement Handling Execution Details response
+*** TODO Integrate Execution Details response in backTester.
 *** TODO Implement Execution ID to OrderID and OrderID to Execution ID mapping.
-*** TODO Figure out the cardinality between OrderID <=> Execution ID <=> Commission Report.
+*** DONE Figure out the cardinality between OrderID <=> Execution ID <=> Commission Report.
 If the Cardinality between Execution ID and Commission is 1:1, Folks at IBKR are idiots or lazy or both.
 WoW: https://interactivebrokers.github.io/tws-api/classIBApi_1_1Execution.html
 If we expect the executions to be overridable, why do we need the commission report to be seperate?
@@ -16,6 +17,7 @@ assert an error in case we don't get it! It's also posssible to request all the 
 *** TODO Implement error assertions
 *** TODO Implement error handling.
 ** TODO Implement Handling Commission Report
+*** TODO Integrate Commission Report Generation in backTester.
 * TODO Implement CSV output for analysis
 ** TODO Implement a Ledger Manager.
 We need a Manager since we want to modularize how to write ledger.
@@ -55,11 +57,6 @@ Do we need process isolation between logics? So far I think we do.
 5) message should be dequeued when the all the existing subscribers have recived the message.
 
 
-* TODO containerize all the process.
-Since we seem to have a lot and we will have even more.
-Since we need process level isolation for individual Logic 
-But the primary reason to have container is to have horizontal scaling.
-Containers can add a layer of security. But so far that is not our concern. Having simple OS level security is good enough for us.
 * TODO Implement logic termination condition
 We don't expect a logic to go on forever.
 We need to be able to set some condition which logic itself can check and then decide to gracefully terminate itself.
@@ -100,6 +97,10 @@ Need the rename soon!
 :END:
 ** TODO Implement the code to fetch the cost of putting order for a contract, i.e. trading fees.
 
+* TODO L2 Orderbook Ingestion Infra
+Should be able to track Top of the Orderbook.
+Top 10 increments/decrements for ask/bid sides should be a good start.
+Will have to implement seperate Infra for order Executions of ABOVE ASK/BELOW BID OFFERS.
 * TODO Order What Ifs
 :PROPERTIES:
 :VISIBILITY: folded
@@ -138,14 +139,16 @@ Con:
 :VISIBILITY: folded
 :END:
 ** TODO Offline BOT analysis
-*** TODO Need to implement csv generators for logic.
-*** TODO Need to generate Logic/Trading context, which helped inform decission to buy or sell. 
-*** TODO Provide list of context to reffer to for the trade.
 ** TODO Implement streaming data collection to start making granular dataset.
 ** TODO find 5 s Interval historical data of last 5 years at least.
-** TODO write up a simple data back up script for latest data. 
 ** TODO hook up data backup with Onedrive/some cloud storage.
+** DONE write up a simple data back up script for latest data. 
 ** DONE Implement modular data collection script
+* TODO containerize all the process.
+Since we seem to have a lot and we will have even more.
+Since we need process level isolation for individual Logic 
+But the primary reason to have container is to have horizontal scaling.
+Containers can add a layer of security. But so far that is not our concern. Having simple OS level security is good enough for us.
 * DONE Future Enhancements
 :PROPERTIES:
 :VISIBILITY: folded

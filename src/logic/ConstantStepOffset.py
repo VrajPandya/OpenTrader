@@ -96,6 +96,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         self.logicName = "ConstantStepOffset_Simple"
         self.monoInterfaceManager = GLOBAL_CONTEXT.mongoInterfaceManager
         self.mongoCollection = self.monoInterfaceManager.getCollection(self.logicName)
+        self.mongoContextCollection = self.monoInterfaceManager.getCollection(self.state.ledgerContextCollection)
 
         self.orderQuantityInUSD = self.state.orderQuantityInUSD
         self.stateTransitionThreshold = self.state.stateTransitionThreshold
@@ -394,10 +395,6 @@ class ConstantStepOffsetTrader(TraderLogic):
         if self.state.logicState == "SubmittingOrder":
             self.state.logicState = "Observing"
         return
-
-    def onFilled(self, order_info: OrderDescriptor):
-        with self.executionLock:
-            self.onFilledImpl(order_info)
 
     def onFilledImpl(self, order_info: OrderDescriptor):
         order_action = order_info.orderInfo.action

@@ -115,7 +115,6 @@ class TraderLogic(OrderSubscription, PriceSubscription):
     def onFilledImpl(self, order_desc : OrderDescriptor):
         pass
 
-
     def onSubmitterImpl(self, order_desc: OrderDescriptor):
         pass
 

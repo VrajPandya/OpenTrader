@@ -79,6 +79,9 @@ class BackTester:
                 order.orderInfo.filledQuantity = order.orderInfo.totalQuantity
                 order.remainingQuantity = 0
                 
+                # Update Commission Report
+                commission_report = self.feeStructure.getCommissionReport(order)
+                self.strategy.onCommissionReport(order, commission_report)
                 
                 # Update backtester state
                 self.executedOrders.append(order)
@@ -88,6 +91,7 @@ class BackTester:
                 self.strategy.onFilled(order)
                     
                 # Update the plot
+                # TODO: Remove this
                 self.plot_x.append(self.currentTick)
                 self.plot_y.append(curPrice)
                 
