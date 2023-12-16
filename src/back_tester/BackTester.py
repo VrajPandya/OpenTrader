@@ -5,14 +5,10 @@ from state_tracking.OrderSubscription import OrderDescriptor
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibkr_app.utils.contract_helper import createContractDescriptor
 import matplotlib.pyplot as plt
-from MockFeeStructure import FeeStructure
-from ibapi.execution import Execution
-from ibapi.commission_report import CommissionReport
+from back_tester.MockFeeStructure import FeeStructure
 
-CSV_DATA_PATH = "/Users/vrajpandya/repo/OpenTrader/data/btc_historical_data_1_copy.csv"
-
-
-BTC_CONTRACT = createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", "PAXOS")
+BTC_CONTRACT = createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", "GEMINI")
+FEE_STRUCTURE_JSON = "fee_structure.json"
 
 class BackTester:
     def __init__(self, csv_data_path : str, strategy : TraderLogic):
@@ -24,7 +20,7 @@ class BackTester:
         self.currentTickTime = 0
         self.currentTick = 0
         self.currentExecutionID = 0
-        self.feeStructure = FeeStructure("default_fees.json")
+        self.feeStructure = FeeStructure("src/back_tester/default_fees.json")
         self.csvFile = open(self.csv_data_path, "r")
         self.csvReader = csv.reader(self.csvFile)
         self.strategy.setOrderAPI(self)
@@ -74,7 +70,7 @@ class BackTester:
                 order.currentFill = order.orderInfo.totalQuantity
                 
                 order.currentRemaining = 0
-                order.currentAvgFillPrice = curPrice
+                order.currentAverageFillPrice = curPrice
                 order.avgFillPrice = curPrice
                 order.lastFillPrice = curPrice
                 order.orderInfo.filledQuantity = order.orderInfo.totalQuantity

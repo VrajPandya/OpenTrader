@@ -57,7 +57,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/src/back_test.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "telegramServer",

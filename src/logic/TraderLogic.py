@@ -8,6 +8,10 @@ from state_tracking.OrderSubscription import OrderDescriptor
 from telegram_notifications.TelegramNotifications import TelegramNotificationsManager
 from pathlib import Path
 from threading import Lock
+from trader_ledger.LedgerManager import LedgerManager
+from trader_ledger.Entry import Entry
+from trader_ledger.LedgerContextManager import LedgerContextManager 
+from trader_ledger.EntryContext import EntryContext
 import json
 from os import listdir
 
@@ -46,6 +50,8 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         self.confDir = "TraderLogicConfigs"
         self.logicName = "NONE"
         self.executionLock = Lock()
+        self.orderAPI = None
+        self.ledgerManager = 
 
     def haltLogic(self):
         errorAndNotify("Halting the trader logic" + self.logicName)

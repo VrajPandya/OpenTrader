@@ -232,7 +232,10 @@ class IBKRApp(EWrapper, EClient):
     ## ending in ".01".
     ##
     ## ======================================================================
-    ##
+    ## 
+    ## So, we should be fine maintaining only 1:1 mapping between orderID and
+    ## latest executionID. 
+    ## I.E. We will always override the executionID. Until proven otherwise.
 
     @iswrapper  
     def execDetails(self, reqId: int, contract: Contract, execution: Execution):

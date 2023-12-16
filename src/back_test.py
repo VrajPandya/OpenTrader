@@ -1,4 +1,4 @@
-from back_tester import MongoBackTester
+from back_tester import BackTester
 from globalContext import GLOBAL_CONTEXT
 from telegram_notifications.TelegramNotifications import TelegramNotificationsManagerStub
 from logic.ConstantStepOffset import ConstantStepOffsetTrader
@@ -10,7 +10,7 @@ def main():
     global GLOBAL_CONTEXT
     GLOBAL_CONTEXT.telegramNotificationsManager = TelegramNotificationsManagerStub()
     GLOBAL_CONTEXT.mongoInterfaceManager = MongoInterfaceManager()
-    backTester = MongoBackTester.BackTester(CSV_DATA_PATH, ConstantStepOffsetTrader())
+    backTester = BackTester.BackTester(CSV_DATA_PATH, ConstantStepOffsetTrader())
     backTester.run()
 
 if __name__ == "__main__":

@@ -70,8 +70,8 @@ class ConstantStepOffsetTrader(TraderLogic):
 
     def __init__(self):
         # PriceSubscriber 
-        self.btc_contract = contract_helper.createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", "PAXOS")
-        TraderLogic.__init__(self, [self.btc_contract])
+        
+        
         self.executedOrderCodec = ConstantStepOffsetExecutedOrderCodec()
         self.stateCodec = ConstantStepOffsetStateCodec()
         # config members and what they do:
@@ -89,10 +89,14 @@ class ConstantStepOffsetTrader(TraderLogic):
         config_dir = self.getConfDir()
         self.config_file_name = "ConstantStepOffsetConfig.json"
         logic_file = config_dir.joinpath(self.config_file_name)
+        self.contract_to_trade = contract_helper.createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", exchange)
         self.state = ConstantStepOffsetTraderState()
         data_utils.dict_to_obj(self.getConfig(logic_file), self.state)
         # Trader logic state machine
         
+
+        TraderLogic.__init__(self, [self.contract_to_trade])
+
         self.logicName = "ConstantStepOffset_Simple"
         self.monoInterfaceManager = GLOBAL_CONTEXT.mongoInterfaceManager
         self.mongoCollection = self.monoInterfaceManager.getCollection(self.logicName)
@@ -146,7 +150,7 @@ class ConstantStepOffsetTrader(TraderLogic):
             return
         buy_quantity = Decimal(buy_quantity).quantize(Decimal("0.00000001"))
         order_desc = create_limit_order("BUY", "Minutes", buy_quantity, float(targetPrice))
-        order_descriptor = OrderDescriptor(self.btc_contract, order_desc)
+        order_descriptor = OrderDescriptor(self.contract_to_trade, order_desc)
         self.state.logicState = "SubmittingOrder"
         self.inFlightBuyOrders[cur_step] = order_descriptor
         self.submitOrder(order_descriptor)
@@ -162,7 +166,7 @@ class ConstantStepOffsetTrader(TraderLogic):
             logging.info(info_str)
             return
         order_desc = create_limit_order("SELL", "Minutes", sell_quantity, float(target_price))
-        order_descriptor = OrderDescriptor(self.btc_contract, order_desc)
+        order_descriptor = OrderDescriptor(self.contract_to_trade, order_desc)
         self.state.logicState = "SubmittingOrder"
         self.inFlightSellOrders[cur_step] = order_descriptor
         self.submitOrder(order_descriptor)
@@ -430,6 +434,12 @@ class ConstantStepOffsetTrader(TraderLogic):
                         " avgFillPrice: " + str(order_info.currentAverageFillPrice) +
                         " lastFillPrice: " + str(order_info.lastFillPrice))
 
+    def onExecDetailsImpl(self, order_info : OrderDescriptor, execution_report):
+        return
+    
+    def onCommissionReportImpl(self, order_info : OrderDescriptor, commission_report):
+        return
+    
     def onOrderErrorImpl(self, order_info: OrderDescriptor):
         super().onOrderError(order_info)
         errorAndNotify("Something went Wrong: " + order_info.errorState.errorString + 

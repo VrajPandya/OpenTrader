@@ -1,9 +1,9 @@
 {
-"GEMINI" : {
+"GEMINI": {
     "BTCUSD": {
-            "fees" : 0.4,
-            "structure" : "OrderSize",
-            "currency" : "USD"
-        }
+        "fee_multiple": 0.004,
+        "structure": "OrderSizeMultiple",
+        "currency": "USD"
+    }
 }
 }
