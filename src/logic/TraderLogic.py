@@ -51,7 +51,7 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         self.logicName = "NONE"
         self.executionLock = Lock()
         self.orderAPI = None
-        self.ledgerManager = 
+        self.ledgerManager = LedgerManager(output_path="")
 
     def haltLogic(self):
         errorAndNotify("Halting the trader logic" + self.logicName)
