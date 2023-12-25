@@ -1,55 +1,8 @@
 #+title: Open Trader
 #+author: Vraj Pandya
-#+date:File 2023-12-17
+#+date:File 2023-12-25
 #+STARTUP: overview
 Org file for OpenTrader.
-
-* What was I Thinking?
-Of course the trading platform project becomes open comercialized and gets
-converted as a product! The opertunity is, finance people are mainly motivated
-by money, they must have had an offer they cannot refuse.
-
-Once they get it, they simply change the open version to a close sourced first
-open version, i.e. you have to hack really hard to get it working on your
-machine such that it's just not worth it.
-
-The oppertunity here is have a truly open Trading Engine.
-** My false perception
-This project so far has helped me better understand what the overall structure
-to trade automatically should look like.
-
-We only learn linked list, hash maps and graphs once. We implement simple
-algorithms. We learn the basics, internalize it and then move on to using a
-library implementation.
-
-This allows us to start delivering value and reaping rewards.
-
-I have managed to find an open source solution for algo trading.
-
-Pro:
-1. Well tested solution.
-2. Lots of starts and forks with active contributions.
-3. Supposed to have paying clients.
-4. Option to have a well structured cloud solution.
-5. Well containerized.
-6. Supports C# and python.
-
-Con:
-0. Too productized! It's harder to get it working for free on my machine than
-   simply developing my own engine.
-1. Asking for my IBKR username password!! Hard NO!
-2. There are some hooks to login which are unavoidable.
-   Will have to learn to avoid those.
-3. No gemini integration yet. Might have to implement my own.
-4. No process isolation.
-   They have primary Memory and logical isolation.
-   Might have to just fork off multiple instance of the lean system
-   to get process process isolation. 
-5. From comments the options resolution seems to be Minutes!
-   That's no Good.
-   I am planning to trade options my self for a while, so shouldn't be
-   a big problem. 
-
 
 * TODO Implement Mock Fee structure
 ** TODO Implement Handling Execution Details response
@@ -316,3 +269,50 @@ dynamic algo as well that can take some of low latency needs away from us.
 *** DONE Implement a triple buffer swap chain for faster analysis
 No need. Simple architecture of Trader logic registering for tick updates only need to mange its state machine. The state machine management is very simple.
 Since all state machine management is mathemetical non blocking operations. We are not making big predictions. Only little adjustments.
+* What was I Thinking?
+Of course the trading platform project becomes open comercialized and gets
+converted as a product! The opertunity is, finance people are mainly motivated
+by money, they must have had an offer they cannot refuse.
+
+Once they get it, they simply change the open version to a close sourced first
+open version, i.e. you have to hack really hard to get it working on your
+machine such that it's just not worth it.
+
+The oppertunity here is have a truly open Trading Engine.
+** My false perception
+This project so far has helped me better understand what the overall structure
+to trade automatically should look like.
+
+We only learn linked list, hash maps and graphs once. We implement simple
+algorithms. We learn the basics, internalize it and then move on to using a
+library implementation.
+
+This allows us to start delivering value and reaping rewards.
+
+I have managed to find an open source solution for algo trading.
+
+Pro:
+1. Well tested solution.
+2. Lots of starts and forks with active contributions.
+3. Supposed to have paying clients.
+4. Option to have a well structured cloud solution.
+5. Well containerized.
+6. Supports C# and python.
+
+Con:
+0. Too productized! It's harder to get it working for free on my machine than
+   simply developing my own engine.
+1. Asking for my IBKR username password!! Hard NO!
+2. There are some hooks to login which are unavoidable.
+   Will have to learn to avoid those.
+3. No gemini integration yet. Might have to implement my own.
+4. No process isolation.
+   They have primary Memory and logical isolation.
+   Might have to just fork off multiple instance of the lean system
+   to get process process isolation. 
+5. From comments the options resolution seems to be Minutes!
+   That's no Good.
+   I am planning to trade options my self for a while, so shouldn't be
+   a big problem. 
+
+

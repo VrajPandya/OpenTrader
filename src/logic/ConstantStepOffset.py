@@ -68,10 +68,11 @@ class ConstantStepOffsetTrader(TraderLogic):
             ]})
         logging.info("Deleted step:" + str(orderStep) + " documents")
 
-    def __init__(self):
-        # PriceSubscriber 
+    def __init__(self, exchange : str):
+        self.contract_to_trade = contract_helper.createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", exchange)
+        TraderLogic.__init__(self, [self.contract_to_trade])
         
-        
+        # PriceSubscribers 
         self.executedOrderCodec = ConstantStepOffsetExecutedOrderCodec()
         self.stateCodec = ConstantStepOffsetStateCodec()
         # config members and what they do:
@@ -89,14 +90,11 @@ class ConstantStepOffsetTrader(TraderLogic):
         config_dir = self.getConfDir()
         self.config_file_name = "ConstantStepOffsetConfig.json"
         logic_file = config_dir.joinpath(self.config_file_name)
-        self.contract_to_trade = contract_helper.createContractDescriptor("BTC", "CRYPTO", "USD", "SMART", exchange)
+        
         self.state = ConstantStepOffsetTraderState()
         data_utils.dict_to_obj(self.getConfig(logic_file), self.state)
-        # Trader logic state machine
         
-
-        TraderLogic.__init__(self, [self.contract_to_trade])
-
+        # Trader logic state machine
         self.logicName = "ConstantStepOffset_Simple"
         self.monoInterfaceManager = GLOBAL_CONTEXT.mongoInterfaceManager
         self.mongoCollection = self.monoInterfaceManager.getCollection(self.logicName)

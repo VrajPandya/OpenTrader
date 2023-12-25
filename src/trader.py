@@ -44,7 +44,7 @@ def ib_trader_main():
     trader_logic_list = []
     
     setup_managers_and_globals()
-    constantStepOffsetTrader = ConstantStepOffsetTrader()
+    constantStepOffsetTrader = ConstantStepOffsetTrader("PAXOS")
     trader_logic_list.append(constantStepOffsetTrader)
     
     #TODO: make this configurable

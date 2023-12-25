@@ -1,4 +1,5 @@
 from trader_ledger.Entry import Entry
+from pathlib import Path
 import os
 import csv
 
@@ -10,17 +11,18 @@ import csv
 class LedgerManager:
     def __init__(self, output_format = "CSV", output_path = "") -> None:
         self.output_format = output_format
-        self.output_path = output_path + "TraderLedger/"
+        self.output_path = output_path + "/TraderLedger/"
+        self.file_path = self.output_path + 'ledger.' + self.output_format
         self.last_id = self.checkForExistingLedger()
         if self.last_id == -1:
             self.last_id = 0
+            self.writeHeader()
         else:
             self.last_id = self.last_id + 1
-        self.file_path = self.output_path + 'ledger.' + self.output_format
-        self.writeHeader()
+        
 
     def writeHeader(self):
-        with open(self.file_path, 'w') as file:
+        with open(self.file_path, "a+") as file:
             writer = csv.writer(file)
             writer.writerow(["EntryID", 
                              # Order

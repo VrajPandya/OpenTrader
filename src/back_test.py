@@ -10,7 +10,7 @@ def main():
     global GLOBAL_CONTEXT
     GLOBAL_CONTEXT.telegramNotificationsManager = TelegramNotificationsManagerStub()
     GLOBAL_CONTEXT.mongoInterfaceManager = MongoInterfaceManager()
-    backTester = BackTester.BackTester(CSV_DATA_PATH, ConstantStepOffsetTrader())
+    backTester = BackTester.BackTester(CSV_DATA_PATH, ConstantStepOffsetTrader("GEMINI"))
     backTester.run()
 
 if __name__ == "__main__":

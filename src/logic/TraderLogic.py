@@ -13,7 +13,7 @@ from trader_ledger.Entry import Entry
 from trader_ledger.LedgerContextManager import LedgerContextManager 
 from trader_ledger.EntryContext import EntryContext
 import json
-from os import listdir
+from os import listdir, getcwd
 
 ###
 ###
@@ -51,7 +51,8 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         self.logicName = "NONE"
         self.executionLock = Lock()
         self.orderAPI = None
-        self.ledgerManager = LedgerManager(output_path="")
+        cwd = getcwd()
+        self.ledgerManager = LedgerManager(output_path=cwd + "/data")
 
     def haltLogic(self):
         errorAndNotify("Halting the trader logic" + self.logicName)
