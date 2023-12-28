@@ -40,7 +40,9 @@ class LedgerManager:
         if os.path.exists(self.file_path):
             with open(self.file_path, 'r') as file:
                 last_line = list(csv.reader(file))[-1]
-                last_id = last_line[0]
+                last_col = last_line[0]
+                if last_col == "EntryID":
+                    return -1
                 return int(last_id)
         else:
             return -1

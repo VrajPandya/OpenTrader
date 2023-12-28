@@ -27,6 +27,13 @@ Will have to figure out Cardinality of Ledger and Entry Context data.
 For now we will use 1:1 Cardinality. Worst case we might have to consider 1:Many. But that is a very special case.
 All the Logic that needs to add Context will have to provide the codec for the context.
 * TODO Implement Order context writing for offline analysis
+** TODO Implement a proper tracking mechanism for order Context and Entries.
+*** TODO Figure out the interaction sequence for the context and entries.
+Places where the context can be generated:
+1. onFilled
+Places where entries can be generated:
+1. onCommissionReport
+
 ** TODO Implement a simple context Manager.
 A simple Manager which takes in Context Codecs.
 ** TODO Implement simple codec for constant step offset

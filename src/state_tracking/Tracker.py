@@ -1,8 +1,10 @@
 from state_tracking.OrderSubscription import OrderSubscription, OrderDescriptor
 from ibapi.contract import Contract
 from logic import TraderLogic
+from trader_ledger.LedgerManager import LedgerManager
 from ibapi.commission_report import CommissionReport
 from ibapi.execution import Execution
+from os import getcwd
 import logging
 
 ### Order Tracker only tracks the orders that are Orders on an instrument.
@@ -114,3 +116,51 @@ class ExecutionTracker:
 
     def stopTrackingForExecutionID(self, executionID: str):
         self.executionIDToOrderID.pop(executionID, None)
+
+class EntryTracker:
+    orderIDToEntry : dict[int, TraderLogic.Entry]
+
+    def __init__(self):
+        self.orderIDToEntry = dict()
+        # cwd = getcwd()
+        # self.ledgerManager = LedgerManager(output_path=cwd + "/data")
+    
+    def trackEntry(self, entry: TraderLogic.Entry):
+        orderID = entry.order_desc.orderID
+        self.orderIDToEntry[orderID] = entry
+    
+    def updateEntryOrderDesc(self, orderID: int, order_desc: OrderDescriptor):
+        entry = self.orderIDToEntry[orderID]
+        entry.order_desc = order_desc
+
+    def updateEntryLatestExecution(self, orderID: int, latest_execution: Execution):
+        entry = self.orderIDToEntry[orderID]
+        entry.latest_execution = latest_execution
+
+    def updateEntryCommissionReport(self, orderID: int, commission_report: CommissionReport):
+        entry = self.orderIDToEntry[orderID]
+        entry.commission_report = commission_report
+
+    def getEntryForOrderID(self, orderID: int):
+        return self.orderIDToEntry[orderID]
+
+    def stopTrackingForOrderID(self, orderID: int):
+        self.orderIDToEntry.pop(orderID, None)
+
+class EntryContextTracker:
+    orderIDToEntryContext : dict[int, TraderLogic.EntryContext]
+
+    def __init__(self):
+        self.orderIDToEntryContext = dict()
+    
+    def trackEntryContext(self, order_id: int, entry_context: TraderLogic.EntryContext):
+        self.orderIDToEntryContext[order_id] = entry_context
+
+    def updateEntryContext(self, order_id: int, entry_context: TraderLogic.EntryContext):
+        self.orderIDToEntryContext[order_id] = entry_context
+    
+    def getEntryContextForOrderID(self, order_id: int):
+        return self.orderIDToEntryContext[order_id]
+    
+    def stopTrackingForOrderID(self, order_id: int):
+        self.orderIDToEntryContext.pop(order_id, None)

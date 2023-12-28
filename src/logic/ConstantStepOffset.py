@@ -8,6 +8,7 @@ from ibkr_app.utils.TracingUtils import errorAndNotify, infoAndNotify
 from globalContext import GLOBAL_CONTEXT
 from state_tracking.OrderSubscription import OrderDescriptor
 from trader_mongo import TraderMongoInterface
+from trader_ledger.Entry import Entry
 import logging
 from time import sleep
 
@@ -406,7 +407,7 @@ class ConstantStepOffsetTrader(TraderLogic):
 
         # We need to check if the order filled notification is duplicate or not.
 
-        
+        action_str = None
         if order_action == "BUY":
 
             if self.inFlightBuyOrders[inProgressOrderStep] == None:
@@ -416,6 +417,7 @@ class ConstantStepOffsetTrader(TraderLogic):
             executed_orders[inProgressOrderStep] = order_info
             self.upsertExecutedOrderState(order_info, inProgressOrderStep)
             self.inFlightBuyOrders[inProgressOrderStep] = None
+            action_str = "BOUGHT"
         else:
             if self.inFlightSellOrders[inProgressOrderStep] == None:
                 # TODO: use order ID to ensure we are not deleting the wrong order
@@ -424,10 +426,11 @@ class ConstantStepOffsetTrader(TraderLogic):
             executed_orders[inProgressOrderStep] = None
             self.inFlightSellOrders[inProgressOrderStep] = None
             self.deleteExecutedOrder(order_info, inProgressOrderStep)
+            action_str = "SOLD"
 
         if self.state.logicState == "SubmittingOrder":
             self.state.logicState = "Observing"
-        action_str = "BOUGHT" if order_action == "BUY" else "SOLD"
+
         infoAndNotify(action_str + "! Quatity: " + str(order_info.orderInfo.totalQuantity) +
                         " avgFillPrice: " + str(order_info.currentAverageFillPrice) +
                         " lastFillPrice: " + str(order_info.lastFillPrice))

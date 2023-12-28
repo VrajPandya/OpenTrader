@@ -1,19 +1,23 @@
 from state_tracking.OrderSubscription import OrderSubscription
 from state_tracking.PriceSubscription import PriceSubscription
+from state_tracking.Tracker import EntryTracker, EntryContextTracker
 from ibapi.commission_report import CommissionReport
 from ibapi.execution import Execution
 from ibkr_app.utils.TracingUtils import errorAndNotify
 from ibapi.contract import Contract
 from state_tracking.OrderSubscription import OrderDescriptor 
 from telegram_notifications.TelegramNotifications import TelegramNotificationsManager
-from pathlib import Path
-from threading import Lock
 from trader_ledger.LedgerManager import LedgerManager
 from trader_ledger.Entry import Entry
 from trader_ledger.LedgerContextManager import LedgerContextManager 
 from trader_ledger.EntryContext import EntryContext
+
 import json
+
 from os import listdir, getcwd
+from pathlib import Path
+from threading import Lock
+
 
 ###
 ###
@@ -43,7 +47,6 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         conf_dir = self.getConfDir()
         return listdir(str(conf_dir))
         
-
     def __init__(self, contract_list: list[Contract]):
         PriceSubscription.__init__(self, contract_list)
         OrderSubscription.__init__(self)
@@ -51,9 +54,11 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         self.logicName = "NONE"
         self.executionLock = Lock()
         self.orderAPI = None
+        self.entryTracker = EntryTracker()
+        self.entryContextTracker = EntryContextTracker()
         cwd = getcwd()
         self.ledgerManager = LedgerManager(output_path=cwd + "/data")
-
+        
     def haltLogic(self):
         errorAndNotify("Halting the trader logic" + self.logicName)
         exit()
@@ -73,10 +78,12 @@ class TraderLogic(OrderSubscription, PriceSubscription):
     
     def onRejected(self, order_desc: OrderDescriptor):
         with self.executionLock:
+            self.entryTracker.stopTrackingForOrderID(order_desc.orderID)
             self.onRejectedImpl(order_desc)
-
+            
     def onCanceled(self, order_desc: OrderDescriptor):
         with self.executionLock:
+            self.entryTracker.stopTrackingForOrderID(order_desc.orderID)
             self.onCanceledImpl(order_desc)
 
     def onAccepted(self, order_desc: OrderDescriptor):
@@ -85,18 +92,24 @@ class TraderLogic(OrderSubscription, PriceSubscription):
 
     def onFilled(self, order_desc : OrderDescriptor):
         with self.executionLock:
-            self.onFilledImpl(order_desc)
+            self.entryTracker.trackEntry(Entry(order_desc, None, None, self.logicName))
+            entry_context_data = self.onFilledImpl(order_desc)
+            self.entryContextTracker.trackEntryContext(EntryContext(entry_id, entry_context_data)) 
 
     def onExecDetails(self, order_desc : OrderDescriptor, execution_report : Execution):
         with self.executionLock:
             print("Exec Details : " + str(execution_report))
+            self.entryTracker.updateEntryLatestExecution(order_desc.orderID, execution_report)
             self.onExecDetailsImpl(order_desc, execution_report)
 
     def onCommissionReport(self, order_desc : OrderDescriptor, commission_report : CommissionReport):
         with self.executionLock:
             print("Commission Report : " + str(commission_report))
-            self.onCommissionReportImpl(order_desc, commission_report)
-
+            self.entryTracker.updateEntryCommissionReport(order_desc.orderID, commission_report)
+            context_data = self.onCommissionReportImpl(order_desc, commission_report)
+            self.entryContextTracker.trackEntryContext(order_desc.orderID, EntryContext(-1, context_data))
+            if self.entryTracker.getEntryForOrderID(order_desc.orderID).checkAllFeildsPresent():
+                
     def onSubmitted(self, order_desc: OrderDescriptor):
         with self.executionLock:
             self.onSubmitterImpl(order_desc)
@@ -107,6 +120,7 @@ class TraderLogic(OrderSubscription, PriceSubscription):
 
     def onOrderError(self, order_desc: OrderDescriptor):
         with self.executionLock:
+            self.entryTracker.stopTrackingForOrderID(order_desc.orderID)
             self.onOrderErrorImpl(order_desc)
 
     def onPriceUpdateImpl(self, updated_price: float, contract_for_update: Contract):
