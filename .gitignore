@@ -1,3 +1,6 @@
+# Trader ledger for now
+data/TraderLedger/
+
 #build directory
 build*
 

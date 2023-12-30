@@ -1,9 +1,14 @@
 class LedgerContextManager:
-    def __init__(self, mongo_interface, context_codec,
-                 collection_name):
+    def __init__(self, mongo_interface):
         self.mongodb_interface = mongo_interface
+        self.collection_name = None
+        self.context_codec = None
+
+    def updateContextCodec(self, context_codec):
         self.context_codec = context_codec
-        self.collection_name = collection_name
+
+    def updateContextCollectionName(self, context_collection_name):
+        self.collection_name = context_collection_name
 
     # NOTE: for now there can be only one context per entry_id
     def addContext(self, entry_id, context):

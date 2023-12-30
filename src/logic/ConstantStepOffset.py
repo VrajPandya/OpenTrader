@@ -8,6 +8,7 @@ from ibkr_app.utils.TracingUtils import errorAndNotify, infoAndNotify
 from globalContext import GLOBAL_CONTEXT
 from state_tracking.OrderSubscription import OrderDescriptor
 from trader_mongo import TraderMongoInterface
+from logic.logic_context.ConstantStepOffsetContext import ConstantStepOffsetContextCodec
 from trader_ledger.Entry import Entry
 import logging
 from time import sleep
@@ -94,6 +95,10 @@ class ConstantStepOffsetTrader(TraderLogic):
         
         self.state = ConstantStepOffsetTraderState()
         data_utils.dict_to_obj(self.getConfig(logic_file), self.state)
+
+        # Setup Context Manager
+        self.ledgerContextManager.updateContextCodec(ConstantStepOffsetContextCodec)
+        self.ledgerContextManager.updateContextCollectionName("ConstantStepOffset_" + str(self.state.baseline) + "_" + str(self.state.stepDelta))
         
         # Trader logic state machine
         self.logicName = "ConstantStepOffset_Simple"

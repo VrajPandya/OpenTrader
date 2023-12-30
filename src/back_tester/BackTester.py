@@ -18,6 +18,7 @@ class BackTester:
         self.executedOrders = []
         self.inFlightOrders = []
         self.currentTickTime = 0
+        self.curBackTestOrderID = 0 
         self.currentTick = 0
         self.currentExecutionID = 0
         self.feeStructure = FeeStructure("src/back_tester/default_fees.json")
@@ -32,6 +33,8 @@ class BackTester:
         exit()
 
     def placeOrderAndSubscribe(self, orderInfo : OrderDescriptor, orderSubscription):
+        self.curBackTestOrderID = self.curBackTestOrderID + 1
+        orderInfo.orderID = self.curBackTestOrderID
         self.openOrders.append(orderInfo)
         self.inFlightOrders.append(orderInfo)
         return orderSubscription
@@ -69,6 +72,7 @@ class BackTester:
                 order.orderInfo.status = "FILLED"
                 order.currentFill = order.orderInfo.totalQuantity
                 
+                # order.OrderID = 
                 order.currentRemaining = 0
                 order.currentAverageFillPrice = curPrice
                 order.avgFillPrice = curPrice
