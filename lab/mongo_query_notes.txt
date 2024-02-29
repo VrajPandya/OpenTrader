@@ -1,0 +1,7 @@
+Useful Queries for mongodb.
+
+1. Find all documents where EntryContext field is not null
+{"entry_context" : {$exists : true}}
+
+2. order_id of entry_context is not null.
+{"entry_context" : {order_id : { $ne : null}}}

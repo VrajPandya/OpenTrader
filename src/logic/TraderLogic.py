@@ -64,8 +64,23 @@ class TraderLogic(OrderSubscription, PriceSubscription):
         errorAndNotify("Halting the trader logic" + self.logicName)
         exit()
 
-    def submitOrder(self, order_desc):
-        return self.orderAPI.placeOrderAndSubscribe(order_desc, self)
+    # ===============================================================================================
+    # It makes sense that when we submit the order we	should have all	the context we need.
+    # So it makes sense to generate context there. So	we can	call SubmitOrder	with this context.
+    # The TraderLogic	should be able to handle this.
+    # We allow not generating	the context by setting the default value as well.
+    # Generating Order and Entry context at the SubmitOrder handling avoids the need of maintaining
+    # state of the context to	be transfered from the App logic to the	internal state machine,
+    # later on. This also avoids need	for the	App to maintain	context	tracking.
+    # This also helps	avoid the need to solve	the concurancy problem of populating Context into the
+    # tracking state machine.
+    # ===============================================================================================
+    def submitOrder(self, order_desc, order_context = None):
+        order_desc.orderID = self.orderAPI.placeOrderAndSubscribe(order_desc, self)
+        if order_context != None:
+            self.entryContextTracker.trackEntryContext(order_desc.orderID, order_context)
+        self.entryTracker.trackEntry(Entry(order_desc, None, None, None)) 
+        return order_desc.orderID
     
     def setOrderAPI(self, order_api):
         self.orderAPI = order_api
@@ -93,35 +108,37 @@ class TraderLogic(OrderSubscription, PriceSubscription):
 
     def onFilled(self, order_desc : OrderDescriptor):
         with self.executionLock:
-            self.entryTracker.trackEntry(Entry(order_desc, None, None, self.logicName))
-            entry_context_data = self.onFilledImpl(order_desc)
-            self.entryContextTracker.trackEntryContext(order_desc.orderID, 
-                        EntryContext(order_desc.orderID, entry_context_data)) 
+            self.onFilledImpl(order_desc)
+
+    def considerWritingLedgerAndContext(self, order_desc : OrderDescriptor):
+        entry_to_add = self.entryTracker.getEntryForOrderID(order_desc.orderID)
+        if entry_to_add != None and entry_to_add.checkAllFeildsPresent():
+            ledger_entry_id = self.ledgerManager.addEntry(entry_to_add)
+            entry_context = self.entryContextTracker.getEntryContextForOrderID(order_desc.orderID)
+            entry_context.entry_id = ledger_entry_id
+            self.ledgerContextManager.addContext(entry_context)
 
     def onExecDetails(self, order_desc : OrderDescriptor, execution_report : Execution):
         with self.executionLock:
-            print("Exec Details : " + str(execution_report))
             self.entryTracker.updateEntryLatestExecution(order_desc.orderID, execution_report)
+            # TODO: Need to verify if the Order Descriptor actually needs an update
+            self.entryTracker.updateEntryOrderDesc(order_desc.orderID, order_desc)
+            
             self.onExecDetailsImpl(order_desc, execution_report)
+            
+            self.considerWritingLedgerAndContext(order_desc)
 
-            entry_to_add = self.entryTracker.getEntryForOrderID(order_desc.orderID)
-            if entry_to_add != None and entry_to_add.checkAllFeildsPresent():
-                self.ledgerManager.addEntry(entry_to_add)
-                self.ledgerContextManager.addContext(entry_to_add, 
-                                                     self.entryContextTracker.getEntryContextForOrderID(order_desc.orderID))
+            
 
     def onCommissionReport(self, order_desc : OrderDescriptor, commission_report : CommissionReport):
         with self.executionLock:
-            print("Commission Report : " + str(commission_report))
             self.entryTracker.updateEntryCommissionReport(order_desc.orderID, commission_report)
-            context_data = self.onCommissionReportImpl(order_desc, commission_report)
-            self.entryContextTracker.trackEntryContext(order_desc.orderID, EntryContext(-1, context_data))
+            # TODO: Need to verify if the Order Descriptor actually needs an update
+            self.entryTracker.updateEntryOrderDesc(order_desc.orderID, order_desc)
             
-            entry_to_add = self.entryTracker.getEntryForOrderID(order_desc.orderID)
-            if entry_to_add != None and entry_to_add.checkAllFeildsPresent():
-                self.ledgerManager.addEntry(entry_to_add)
-                self.ledgerContextManager.addContext(entry_to_add, 
-                                                     self.entryContextTracker.getEntryContextForOrderID(order_desc.orderID))
+            self.onCommissionReportImpl(order_desc, commission_report)
+            
+            self.considerWritingLedgerAndContext(order_desc)
 
     def onSubmitted(self, order_desc: OrderDescriptor):
         with self.executionLock:

@@ -363,7 +363,7 @@ class GeminiApp(Thread):
         print("how did we get here? why do we live?")
         if self.nKeybInt <= 5:
             self.stop()
-        if self.nKeybIntHard > 5:
+        if self.nKeybInt > 5:
             self.stop()
             raise SystemExit()
 

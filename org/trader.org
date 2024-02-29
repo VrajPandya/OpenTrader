@@ -5,9 +5,17 @@
 Org file for OpenTrader.
 
 * TODO Implement Mock Fee structure
+:PROPERTIES:
+:VISIBILITY: content
+:END:
 ** TODO Implement Handling Execution Details response
+*** DONE Need to verify if the updates needed to the execution i.e. udating the orderID and
+Execution/Entry ID are updated as expected.
+*** DONE Need to verify if the Order Descriptor actually needs an update.
+Yes we do need to update Order Descriptor since that will help us get the latest information into the Ledger Entry.
 *** TODO Test Execution Detail response with BackTester.
 *** TODO Test Execution Detail response with Gemini.
+
 *** DONE Integrate Execution Details response in backTester.
 *** DONE Implement Execution ID to OrderID and OrderID to Execution ID mapping.
 *** DONE Figure out the cardinality between OrderID <=> Execution ID <=> Commission Report.
@@ -19,10 +27,13 @@ assert an error in case we don't get it! It's also posssible to request all the 
 *** TODO Implement error assertions
 *** TODO Implement error handling.
 ** TODO Implement Handling Commission Report
-*** TODO Integrate Commission Report Generation in backTester.
+*** DONE Integrate Commission Report Generation in backTester.
 *** TODO Test Commission Report Generation in backTester.
 *** TODO Test Commission Report Generation with Gemini.
 * TODO Implement CSV output for analysis
+:PROPERTIES:
+:VISIBILITY: content
+:END:
 ** TODO Implement a Ledger Manager.
 We need a Manager since we want to modularize how to write ledger.
 This way it would be easy to go from CSV to OLAP or something else if need be.
@@ -31,27 +42,46 @@ Will have to figure out Cardinality of Ledger and Entry Context data.
 For now we will use 1:1 Cardinality. Worst case we might have to consider 1:Many. But that is a very special case.
 All the Logic that needs to add Context will have to provide the codec for the context.
 * TODO Implement Order context writing for offline analysis
-** TODO Implement a proper tracking mechanism for order Context and Entries.
-*** TODO Figure out the interaction sequence for the context and entries.
+** DONE Implement a proper tracking mechanism for order Context and Entries.
+*** DONE Figure out the interaction sequence for the context and entries.
 Places where the context can be generated:
 1. onFilled
-Places where entries can be generated:
+2. SubmitOrder
+
+===============================================================================================
+It makes sense that when we submit the order we should have all the context we need.
+So it makes sense to generate context there. So we can call SubmitOrder with this context.
+The TraderLogic should be able to handle this.
+We allow not generating the context by setting the default value as well.
+Generating Order and Entry context at the SubmitOrder handling avoids the need of maintaining
+state of the context to be transfered from the App logic to the internal state machine,
+later on. This also avoids need for the App to maintain context tracking.
+This also helps avoid the need to solve the concurancy problem of populating Context into the
+tracking state machine.
+===============================================================================================
+
+Places where entries can finish generating:
 1. onCommissionReport
+2. onExecutionReport
 
 We expect to get Context before CommissionReport. Which makes sense since we should be submitting
 an order only if the context is correct and satisfied.
 
-The commission needs to be updatedonce we recive it.
+The Commission and the Execution Report needs to be updated once we recive it.
 
-The order in which the calls are updated are non deterministic.
+The order in which the Executio and the Commission Reports are updated are non deterministic.
 
-
-
+We have to handle the concurrency problem.
+i.e. We have to handle writing the context, commission report and execution report.
 
 *** DONE add orderID feild to the EntryContext as well. Mark it non serializable.
 
 ** TODO Implement a simple context Manager.
 A simple Manager which takes in Context Codecs.
+*** TODO We are getting null for order ID and entry ID in all the entries.
+*** DONE Resolve issue with find one and replace.
+Must understand how we can correctly insert the context.
+For now we can just insert the doc. No need to upsert.
 ** TODO Test the simple context Manager with back tester.
 ** TODO Test the simple context Manager with IBKR.
 ** DONE Implement simple codec for constant step offset
@@ -59,6 +89,7 @@ A simple Manager which takes in Context Codecs.
 :PROPERTIES:
 :VISIBILITY: children
 :END:
+** TODO Stop Tracking OrderIDs.
 ** TODO Test Thread safety 
 ** TODO State transition doesn't work as expected when the price goes below the baseline then up.
 It's possible this happens on Gemini and not with IB since we have essentially multi threaded
@@ -174,10 +205,14 @@ Since we seem to have a lot and we will have even more.
 Since we need process level isolation for individual Logic 
 But the primary reason to have container is to have horizontal scaling.
 Containers can add a layer of security. But so far that is not our concern. Having simple OS level security is good enough for us.
-* DONE Future Enhancements
+* TODO Future Enhancements
 :PROPERTIES:
 :VISIBILITY: folded
 :END:
+** TODO Add support for multiple contexts per entry_id for Ledger context Manager
+Currently a new context is added for an entry it's possible to add multiple context for one Entry ID.
+That could be a feature or a bug. For now it's a feature. We only need to work on this if it
+turns out to be a bug.
 ** DONE Optimize Path to update onPrice Update.
 We are doing a lot of dictionary lookups. That must be Costing a TON. 
 We might as well do a pubsub. Must have

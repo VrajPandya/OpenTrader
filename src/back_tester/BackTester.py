@@ -37,7 +37,7 @@ class BackTester:
         orderInfo.orderID = self.curBackTestOrderID
         self.openOrders.append(orderInfo)
         self.inFlightOrders.append(orderInfo)
-        return orderSubscription
+        return orderInfo.orderID
 
     def tick(self, date_time_str: str, open: Decimal, 
              high: Decimal, low: Decimal, close: Decimal, 

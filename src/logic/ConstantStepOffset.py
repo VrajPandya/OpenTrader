@@ -8,8 +8,7 @@ from ibkr_app.utils.TracingUtils import errorAndNotify, infoAndNotify
 from globalContext import GLOBAL_CONTEXT
 from state_tracking.OrderSubscription import OrderDescriptor
 from trader_mongo import TraderMongoInterface
-from logic.logic_context.ConstantStepOffsetContext import ConstantStepOffsetContextCodec
-from trader_ledger.Entry import Entry
+from logic.logic_context.ConstantStepOffsetContext import ConstantStepOffsetContext, ConstantStepOffsetContextCodec
 import logging
 from time import sleep
 
@@ -29,6 +28,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         if retrived_state_cursor == None:
             # TODO insert the existing state and then return the id of the doc.
             self.saveState()
+            # Somehow adding a sleep here makes things more stable.
             sleep(2)
             retrived_state_cursor = self.mongoCollection.find_one(state_lookup_query)
         
@@ -97,7 +97,7 @@ class ConstantStepOffsetTrader(TraderLogic):
         data_utils.dict_to_obj(self.getConfig(logic_file), self.state)
 
         # Setup Context Manager
-        self.ledgerContextManager.updateContextCodec(ConstantStepOffsetContextCodec)
+        self.ledgerContextManager.updateContextCodec(ConstantStepOffsetContextCodec())
         self.ledgerContextManager.updateContextCollectionName("ConstantStepOffset_" + str(self.state.baseline) + "_" + str(self.state.stepDelta))
         
         # Trader logic state machine
@@ -157,7 +157,8 @@ class ConstantStepOffsetTrader(TraderLogic):
         order_descriptor = OrderDescriptor(self.contract_to_trade, order_desc)
         self.state.logicState = "SubmittingOrder"
         self.inFlightBuyOrders[cur_step] = order_descriptor
-        self.submitOrder(order_descriptor)
+        constant_offset_context = ConstantStepOffsetContext(self.state.baseline, self.state.stepDelta)
+        self.submitOrder(order_descriptor, constant_offset_context)
         
     def placeSellOrder(self, target_price: Decimal, sell_quantity: Decimal, cur_step: int):
         executedOrdersList = self.state.executedOrders
@@ -173,7 +174,8 @@ class ConstantStepOffsetTrader(TraderLogic):
         order_descriptor = OrderDescriptor(self.contract_to_trade, order_desc)
         self.state.logicState = "SubmittingOrder"
         self.inFlightSellOrders[cur_step] = order_descriptor
-        self.submitOrder(order_descriptor)
+        constant_offset_context = ConstantStepOffsetContext(self.state.baseline, self.state.stepDelta)
+        self.submitOrder(order_descriptor, constant_offset_context)
         
     def reachedBuyZoneForStep(self) -> bool:
         baseline = self.state.baseline

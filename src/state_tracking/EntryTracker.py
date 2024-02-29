@@ -67,20 +67,22 @@ class EntryTracker:
         self.orderIDToEntry[orderID] = entry
     
     def updateEntryOrderDesc(self, orderID: int, order_desc: OrderDescriptor):
-        entry = self.orderIDToEntry[orderID]
-        entry.order_desc = order_desc
-
-    def updateEntryLatestExecution(self, orderID: int, latest_execution: Execution):
-        ## Getting Key error here.
-        try:
-            entry = self.orderIDToEntry[orderID]
-        except KeyError:
+        # try:
+            self.orderIDToEntry[orderID].order_desc = order_desc
+        # except KeyError:
+            # self.orderIDToEntry[orderID] = Entry(order_desc, None, None, None)
             
-        entry.latest_execution = latest_execution
+    def updateEntryLatestExecution(self, orderID: int, latest_execution: Execution):
+        # try:
+            self.orderIDToEntry[orderID].latest_execution = latest_execution
+        # except KeyError:
+        #     self.orderIDToEntry[orderID] = Entry(None, latest_execution, None, None)
 
     def updateEntryCommissionReport(self, orderID: int, commission_report: CommissionReport):
-        entry = self.orderIDToEntry[orderID]
-        entry.commission_report = commission_report
+        # try:
+            self.orderIDToEntry[orderID].commission_report = commission_report
+        # except KeyError:
+        #     self.orderIDToEntry[orderID] = Entry(None, None, commission_report, None)   
 
     def getEntryForOrderID(self, orderID: int):
         try:

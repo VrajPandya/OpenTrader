@@ -9,20 +9,25 @@ import csv
 # addEntry generates a new ID for the entry for the Entry Context to reffer back to.
 
 class LedgerManager:
-    def __init__(self, output_format = "CSV", output_path = "") -> None:
+    def __init__(self, output_format = "csv", output_path = "") -> None:
         self.output_format = output_format
         self.output_path = output_path + "/TraderLedger/"
         self.file_path = self.output_path + 'ledger.' + self.output_format
         self.last_id = self.checkForExistingLedger()
-        if self.last_id == -1:
+        if self.last_id == -2:
+            # File exists and the header is already written
+            self.last_id = 0
+        elif self.last_id == -1:
+            # File doesn't exist
             self.last_id = 0
             self.writeHeader()
         else:
+            # File exists and we have some entries
             self.last_id = self.last_id + 1
         
 
     def writeHeader(self):
-        with open(self.file_path, "a+") as file:
+        with open(self.file_path, "w") as file:
             writer = csv.writer(file)
             writer.writerow(["EntryID", 
                              # Order
@@ -40,10 +45,10 @@ class LedgerManager:
         if os.path.exists(self.file_path):
             with open(self.file_path, 'r') as file:
                 last_line = list(csv.reader(file))[-1]
-                last_col = last_line[0]
-                if last_col == "EntryID":
-                    return -1
-                return int(last_id)
+                first_col = last_line[0]
+                if first_col == "EntryID":
+                    return -2
+                return int(first_col)
         else:
             return -1
 
