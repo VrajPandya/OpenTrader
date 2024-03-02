@@ -13,7 +13,7 @@ Org file for OpenTrader.
 Execution/Entry ID are updated as expected.
 *** DONE Need to verify if the Order Descriptor actually needs an update.
 Yes we do need to update Order Descriptor since that will help us get the latest information into the Ledger Entry.
-*** TODO Test Execution Detail response with BackTester.
+*** DONE Test Execution Detail response with BackTester.
 *** TODO Test Execution Detail response with Gemini.
 
 *** DONE Integrate Execution Details response in backTester.
@@ -28,7 +28,7 @@ assert an error in case we don't get it! It's also posssible to request all the 
 *** TODO Implement error handling.
 ** TODO Implement Handling Commission Report
 *** DONE Integrate Commission Report Generation in backTester.
-*** TODO Test Commission Report Generation in backTester.
+*** DONE Test Commission Report Generation in backTester.
 *** TODO Test Commission Report Generation with Gemini.
 * TODO Implement CSV output for analysis
 :PROPERTIES:
@@ -42,6 +42,8 @@ Will have to figure out Cardinality of Ledger and Entry Context data.
 For now we will use 1:1 Cardinality. Worst case we might have to consider 1:Many. But that is a very special case.
 All the Logic that needs to add Context will have to provide the codec for the context.
 * TODO Implement Order context writing for offline analysis
+** TODO Test the simple context Manager with Gemini
+** TODO Test the simple context Manager with IBKR.
 ** DONE Implement a proper tracking mechanism for order Context and Entries.
 *** DONE Figure out the interaction sequence for the context and entries.
 Places where the context can be generated:
@@ -76,14 +78,13 @@ i.e. We have to handle writing the context, commission report and execution repo
 
 *** DONE add orderID feild to the EntryContext as well. Mark it non serializable.
 
-** TODO Implement a simple context Manager.
+** DONE Implement a simple context Manager.
 A simple Manager which takes in Context Codecs.
-*** TODO We are getting null for order ID and entry ID in all the entries.
+*** DONE We are getting null for order ID and entry ID in all the entries.
 *** DONE Resolve issue with find one and replace.
 Must understand how we can correctly insert the context.
 For now we can just insert the doc. No need to upsert.
-** TODO Test the simple context Manager with back tester.
-** TODO Test the simple context Manager with IBKR.
+** DONE Test the simple context Manager with back tester.
 ** DONE Implement simple codec for constant step offset
 * TODO HIPRI Bugs
 :PROPERTIES:
