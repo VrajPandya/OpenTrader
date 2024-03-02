@@ -78,6 +78,7 @@ class TraderLogic(OrderSubscription, PriceSubscription):
     def submitOrder(self, order_desc, order_context = None):
         order_desc.orderID = self.orderAPI.placeOrderAndSubscribe(order_desc, self)
         if order_context != None:
+            order_context.updateOrderID(order_desc.orderID)
             self.entryContextTracker.trackEntryContext(order_desc.orderID, order_context)
         self.entryTracker.trackEntry(Entry(order_desc, None, None, None)) 
         return order_desc.orderID
@@ -108,15 +109,16 @@ class TraderLogic(OrderSubscription, PriceSubscription):
 
     def onFilled(self, order_desc : OrderDescriptor):
         with self.executionLock:
+            self.entryTracker.stopTrackingForOrderID(order_desc.orderID)
             self.onFilledImpl(order_desc)
 
     def considerWritingLedgerAndContext(self, order_desc : OrderDescriptor):
         entry_to_add = self.entryTracker.getEntryForOrderID(order_desc.orderID)
         if entry_to_add != None and entry_to_add.checkAllFeildsPresent():
             ledger_entry_id = self.ledgerManager.addEntry(entry_to_add)
-            entry_context = self.entryContextTracker.getEntryContextForOrderID(order_desc.orderID)
-            entry_context.entry_id = ledger_entry_id
-            self.ledgerContextManager.addContext(entry_context)
+            context = self.entryContextTracker.getEntryContextForOrderID(order_desc.orderID)
+            context.updateEntryID(ledger_entry_id)
+            self.ledgerContextManager.addContext(context)
 
     def onExecDetails(self, order_desc : OrderDescriptor, execution_report : Execution):
         with self.executionLock:

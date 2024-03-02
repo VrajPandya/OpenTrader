@@ -124,8 +124,12 @@ class BackTester:
         plt.xlim(0,35000)
         plt.ylim(26000,29000)
         sc = self.ax.scatter(self.plot_x, self.plot_y, c= self.color_map)
+        
+        # annotate plot
+        # for i, txt in enumerate(self.plot_y):
+        #     self.ax.annotate(txt, (self.plot_x[i], self.plot_y[i]))
+        
         plt.draw()
-        plt.pause(0.1)
         plt.show()
         plt.waitforbuttonpress()
         

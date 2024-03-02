@@ -7,6 +7,9 @@ class EntryContext:
 
     def updateEntryID(self, entry_id):
         self.entry_id = entry_id
+    
+    def updateOrderID(self, order_id):
+        self.order_id = order_id
 
 class EntryContextCodec(TypeCodec):
     python_type = EntryContext

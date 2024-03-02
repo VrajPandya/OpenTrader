@@ -7,8 +7,14 @@ class ConstantStepOffsetContext():
         self.baseline = baseline
         self.step = step
 
+    # TODO : Resolve the protocol issue
+    # How do we extend a class / interface so that the new classes can
+    # use the protocol methods but, don't inherit the class?
     def updateEntryID(self, entry_id):
         self.entry_context.updateEntryID(entry_id)
+    
+    def updateOrderID(self, order_id):
+        self.entry_context.updateOrderID(order_id)
 
 class ConstantStepOffsetContextCodec(TypeCodec):
     python_type = ConstantStepOffsetContext
