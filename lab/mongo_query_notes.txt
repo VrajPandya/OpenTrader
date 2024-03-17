@@ -5,3 +5,6 @@ Useful Queries for mongodb.
 
 2. order_id of entry_context is not null.
 {"entry_context" : {order_id : { $ne : null}}}
+
+3. delete all documents for "trader_test_db" for "db.ConstantStepOffset_27888_10.remove" collection we have to give a filter.
+mongosh --eval 'db.ConstantStepOffset_27888_10.remove({ baseline: 27888 })' trader_test_db
